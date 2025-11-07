@@ -7,7 +7,7 @@
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
-    <div class="glass-container">
+    <div class="glass-container" id="main-view">
         <header>
             <h1>Bienvenido a App Craft</h1>
         </header>
@@ -26,6 +26,22 @@
             </nav>
         </main>
     </div>
+
+    <div class="glass-container" id="project-view" style="display: none;">
+        <header>
+            <h1>Mis Proyectos</h1>
+        </header>
+        <main>
+            <div class="project-actions">
+                <button id="new-project-btn">Nuevo Proyecto</button>
+                <button id="open-project-btn">Abrir Proyecto</button>
+            </div>
+            <div class="project-list">
+                <!-- Aquí se listarán los proyectos -->
+            </div>
+        </main>
+    </div>
+
     <script src="script.js"></script>
 </body>
 </html>
