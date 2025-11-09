@@ -3,45 +3,71 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>App Craft - Crea tu App Fácilmente</title>
+    <title>App Craft Editor</title>
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
-    <div class="glass-container" id="main-view">
-        <header>
-            <h1>Bienvenido a App Craft</h1>
-        </header>
-        <main>
-            <p>Crea fácilmente tu app web aquí. Pronto, también para móviles y escritorio.</p>
-            <section class="value-proposition">
-                <h2>¿Por qué crear con App Craft?</h2>
-                <p>Te permitiremos personalizar tus apps al máximo. Podrás crear en horas lo que te costó días hacer solo con código, o lo que te ha costado 50 conversaciones diferentes con una IA solo para cambiar un color.</p>
-                <p>No es que la IA sea mala, de hecho, también ofreceremos servicios de IA, pero aquí podrás crear 100% a tu gusto e imaginación. Serás el ingeniero de tu app, tu diseño, y con solo un poco de código. No necesitarás saber HTML y CSS para crear una sola app, podrás hacerlo solo con conocimiento básico en JS.</p>
-            </section>
-            <nav class="actions">
-                <button id="create-btn">Empieza a crear</button>
-                <button id="community-btn">Unirte a la comunidad</button>
-                <button id="donate-btn">Donar</button>
-                <button id="invite-btn">Invitar amigos</button>
+    <div class="editor-container">
+        <header id="top-bar">
+            <div class="app-title">App Craft - [Sin Proyecto]</div>
+            <nav class="menu">
+                <ul>
+                    <li>Archivo</li>
+                    <li>Editar</li>
+                    <li>Configuración</li>
+                    <li>Librerías</li>
+                    <li>Ayuda</li>
+                </ul>
             </nav>
-        </main>
-    </div>
-
-    <div class="glass-container" id="project-view" style="display: none;">
-        <header>
-            <h1>Mis Proyectos</h1>
         </header>
-        <main>
-            <div class="project-actions">
-                <button id="new-project-btn">Nuevo Proyecto</button>
-                <button id="open-project-btn">Abrir Proyecto</button>
-            </div>
-            <div class="project-list">
-                <!-- Aquí se listarán los proyectos -->
-            </div>
+        <main id="main-layout">
+            <aside id="left-panel">
+                <div id="hierarchy-panel" class="window">
+                    <div class="window-header">
+                        <span>Jerarquía</span>
+                        <button class="close-btn">X</button>
+                    </div>
+                    <div class="window-content">
+                        <!-- Content for hierarchy -->
+                    </div>
+                </div>
+                <div id="files-panel" class="window">
+                    <div class="window-header">
+                        <span>Navegador de Archivos</span>
+                        <button class="close-btn">X</button>
+                    </div>
+                    <div class="window-content">
+                        <!-- Content for files -->
+                    </div>
+                </div>
+            </aside>
+            <section id="center-panel">
+                <div id="view-panel" class="window">
+                     <div class="window-header">
+                        <span>Vista</span>
+                        <div class="view-controls">
+                            <button>▶</button>
+                            <button>❚❚</button>
+                        </div>
+                    </div>
+                    <div class="window-content">
+                        <!-- The main view area -->
+                    </div>
+                </div>
+            </section>
+            <aside id="right-panel">
+                <div id="inspector-panel" class="window">
+                    <div class="window-header">
+                        <span>Inspector</span>
+                        <button class="close-btn">X</button>
+                    </div>
+                    <div class="window-content">
+                        <!-- Content for inspector -->
+                    </div>
+                </div>
+            </aside>
         </main>
     </div>
-
     <script src="script.js"></script>
 </body>
 </html>

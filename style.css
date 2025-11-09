@@ -1,65 +1,142 @@
-@import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&display=swap');
-
+/* General Body Styles */
 body {
-    font-family: 'Orbitron', sans-serif;
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+    background-color: #1e1e1e;
+    color: #d4d4d4;
     margin: 0;
-    padding: 20px;
-    background: linear-gradient(135deg, #0a192f, #1a4d2e, #1f4068);
-    color: #f0f0f0;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    min-height: 100vh;
+    height: 100vh;
     overflow: hidden;
 }
 
-.glass-container {
-    background: rgba(10, 25, 47, 0.2);
-    backdrop-filter: blur(10px);
-    border-radius: 20px;
-    border: 1px solid rgba(255, 255, 255, 0.1);
-    padding: 40px;
-    max-width: 800px;
-    text-align: center;
-    box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
-}
-
-h1, h2 {
-    color: #64ffda;
-}
-
-.value-proposition {
-    margin: 30px 0;
-}
-
-.actions {
+.editor-container {
     display: flex;
-    justify-content: center;
-    gap: 20px;
-    flex-wrap: nowrap;
+    flex-direction: column;
+    height: 100%;
 }
 
-button {
-    font-family: 'Orbitron', sans-serif;
-    background: linear-gradient(90deg, rgba(26, 77, 46, 0.3), rgba(10, 25, 47, 0.5));
-    border: 1px solid rgba(100, 255, 218, 0.5);
-    border-radius: 10px;
-    color: #64ffda;
-    padding: 15px 20px;
+/* Top Bar Styles */
+#top-bar {
+    background-color: #333;
+    padding: 8px 15px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-bottom: 1px solid #000;
+}
+
+.app-title {
+    font-weight: bold;
+}
+
+.menu ul {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    gap: 15px;
+}
+
+.menu ul li {
     cursor: pointer;
-    transition: background 0.3s, box-shadow 0.3s, transform 0.3s;
-    font-size: 1em;
-    box-shadow: 0 0 5px rgba(100, 255, 218, 0.2), 0 0 10px rgba(100, 255, 218, 0.2);
+    font-size: 0.9em;
 }
 
-button:hover {
-    background: linear-gradient(90deg, rgba(26, 77, 46, 0.5), rgba(10, 25, 47, 0.7));
-    box-shadow: 0 0 15px rgba(100, 255, 218, 0.5), 0 0 30px rgba(100, 255, 218, 0.5);
-    transform: translateY(-3px);
+.menu ul li:hover {
+    color: #fff;
 }
 
-@media (max-width: 600px) {
-    .glass-container {
-        padding: 20px;
-    }
+/* Main Layout Grid */
+#main-layout {
+    display: grid;
+    grid-template-columns: 250px 1fr 250px; /* Left, Center, Right */
+    grid-template-rows: 1fr;
+    gap: 5px;
+    padding: 5px;
+    height: 100%;
+    box-sizing: border-box;
+}
+
+/* Panel Styles */
+#left-panel, #right-panel {
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+}
+
+.window {
+    background-color: #2a2a2a;
+    border: 1px solid #3c3c3c;
+    border-radius: 4px;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden; /* To contain children */
+}
+
+#left-panel {
+    grid-column: 1 / 2;
+}
+
+#center-panel {
+    grid-column: 2 / 3;
+    display: flex;
+}
+
+#right-panel {
+    grid-column: 3 / 4;
+}
+
+#hierarchy-panel {
+    flex-basis: 50%; /* Takes up 50% of the left panel */
+}
+
+#files-panel {
+    flex-basis: 50%; /* Takes up 50% of the left panel */
+}
+
+#view-panel, #inspector-panel {
+    flex-grow: 1; /* Takes up all available space in their parent */
+}
+
+/* Window Header Styles */
+.window-header {
+    background-color: #3c3c3c;
+    padding: 5px 10px;
+    font-weight: bold;
+    font-size: 0.8em;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    cursor: move;
+}
+
+.close-btn {
+    background: none;
+    border: none;
+    color: #d4d4d4;
+    cursor: pointer;
+    font-weight: bold;
+}
+
+#view-panel .window-header {
+    background: transparent;
+    border-bottom: 1px solid #3c3c3c;
+}
+
+#view-panel .window-content {
+    background-color: transparent; /* As requested */
+}
+
+.view-controls button {
+    background: #2a2a2a;
+    border: 1px solid #3c3c3c;
+    color: #d4d4d4;
+    border-radius: 3px;
+    margin-left: 5px;
+    cursor: pointer;
+}
+
+.window-content {
+    padding: 10px;
+    flex-grow: 1;
+    overflow: auto; /* For scrollable content later */
 }
