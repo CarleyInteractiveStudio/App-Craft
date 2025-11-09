@@ -1,5 +1,6 @@
 document.addEventListener('DOMContentLoaded', () => {
     let lastClickedFileTarget = null;
+    let lastClickedHierarchyId = null;
     render();
 
     // --- Context Menu Logic ---
@@ -21,9 +22,9 @@ document.addEventListener('DOMContentLoaded', () => {
     hierarchyContextMenu.innerHTML = `
         <ul>
             <li id="create-panel"><i class="fas fa-square"></i> Crear Panel</li>
+            <li id="create-canvas"><i class="fas fa-image"></i> Crear Canvas</li>
             <li id="create-button"><i class="fas fa-mouse-pointer-square"></i> Crear Botón</li>
             <li id="create-text"><i class="fas fa-font"></i> Crear Texto</li>
-            <li id="create-image"><i class="fas fa-image"></i> Crear Imagen</li>
         </ul>
     `;
     document.body.appendChild(hierarchyContextMenu);
@@ -42,6 +43,10 @@ document.addEventListener('DOMContentLoaded', () => {
         hideAllContextMenus();
         const activeWindow = findItemById(fileSystem, activeWindowId);
         if (!activeWindow) return;
+
+        const listItem = e.target.closest('.hierarchy-item');
+        lastClickedHierarchyId = listItem ? parseInt(listItem.dataset.id, 10) : activeWindowId;
+
         hierarchyContextMenu.style.top = `${e.clientY}px`;
         hierarchyContextMenu.style.left = `${e.clientX}px`;
         hierarchyContextMenu.style.display = 'block';
@@ -86,34 +91,57 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         }
         parentFolder.children.push(item);
-        parentFolder.expanded = true; // Ensure folder is expanded when item is added
+        parentFolder.expanded = true;
         render();
     }
 
     // --- Hierarchy Object Creation ---
-    function createHierarchyObject(type, name) {
+    function createHierarchyObject(type) {
         const activeWindow = findItemById(fileSystem, activeWindowId);
         if (!activeWindow) return;
-        const newItem = {
+
+        const parentId = lastClickedHierarchyId || activeWindowId;
+
+        const baseItem = {
             id: activeWindow.nextHierarchyId++,
-            name: name,
-            type: type,
+            parentId: parentId,
             active: true,
             transform: {
                 position: { x: 0, y: 0, z: 0 },
                 rotation: { x: 0, y: 0, z: 0 },
                 scale: { x: 1, y: 1, z: 1 }
-            },
-            children: []
+            }
         };
-        activeWindow.content.push(newItem);
+
+        switch (type) {
+            case 'panel':
+                baseItem.name = 'Nuevo Panel';
+                baseItem.type = 'panel';
+                baseItem.size = { width: 200, height: 150 };
+                break;
+            case 'canvas':
+                baseItem.name = 'Nuevo Canvas';
+                baseItem.type = 'canvas';
+                // Canvas has no size, it inherits from parent
+                break;
+            case 'button':
+                baseItem.name = 'Nuevo Botón';
+                baseItem.type = 'button';
+                break;
+            case 'text':
+                baseItem.name = 'Nuevo Texto';
+                baseItem.type = 'text';
+                break;
+        }
+
+        activeWindow.content.push(baseItem);
         render();
     }
 
-    document.getElementById('create-panel').addEventListener('click', () => createHierarchyObject('panel', 'Nuevo Panel'));
-    document.getElementById('create-button').addEventListener('click', () => createHierarchyObject('button', 'Nuevo Botón'));
-    document.getElementById('create-text').addEventListener('click', () => createHierarchyObject('text', 'Nuevo Texto'));
-    document.getElementById('create-image').addEventListener('click', () => createHierarchyObject('image', 'Nueva Imagen'));
+    document.getElementById('create-panel').addEventListener('click', () => createHierarchyObject('panel'));
+    document.getElementById('create-canvas').addEventListener('click', () => createHierarchyObject('canvas'));
+    document.getElementById('create-button').addEventListener('click', () => createHierarchyObject('button'));
+    document.getElementById('create-text').addEventListener('click', () => createHierarchyObject('text'));
 
     // --- Hierarchy Selection ---
     hierarchyContent.addEventListener('click', (e) => {
@@ -126,16 +154,12 @@ document.addEventListener('DOMContentLoaded', () => {
         const listItem = nameContainer.closest('.hierarchy-item');
         const itemId = parseInt(listItem.dataset.id, 10);
 
-        // Check if the clicked item is the window itself or an element within the window
-        if (itemId === activeWindow.id) {
-            selectedObject = activeWindow;
+        const clickedItem = findItemById(activeWindow.content, itemId) || (itemId === activeWindowId ? activeWindow : null);
+
+        if (e.target.classList.contains('eye-icon') && clickedItem && clickedItem.type !== 'window') {
+            clickedItem.active = !clickedItem.active;
         } else {
-            const clickedItem = findItemById(activeWindow.content, itemId);
-            if (e.target.classList.contains('eye-icon')) {
-                clickedItem.active = !clickedItem.active;
-            } else {
-                selectedObject = clickedItem;
-            }
+            selectedObjectId = itemId;
         }
         render();
     });
@@ -146,14 +170,13 @@ document.addEventListener('DOMContentLoaded', () => {
         if (!activeWindow) return;
 
         if (e.target === viewContent) {
-            selectedObject = null;
+            selectedObjectId = null;
             render();
             return;
         }
         const viewObject = e.target.closest('.view-object');
         if (viewObject) {
-            const objectId = parseInt(viewObject.dataset.id, 10);
-            selectedObject = findItemById(activeWindow.content, objectId);
+            selectedObjectId = parseInt(viewObject.dataset.id, 10);
             render();
         }
     });
@@ -179,7 +202,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
         if (fileItem && fileItem.type === 'window') {
             activeWindowId = fileId;
-            selectedObject = null;
+            selectedObjectId = null;
             render();
         }
     });

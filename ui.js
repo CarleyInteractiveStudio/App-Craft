@@ -2,13 +2,12 @@ const hierarchyContent = document.querySelector('#hierarchy-panel .window-conten
 const fileBrowserContent = document.querySelector('#files-panel .window-content');
 const viewContent = document.querySelector('#view-panel .window-content');
 
-// --- Icon Maps ---
 const hierarchyIconMap = {
-    window: 'fa-desktop', // Add window icon
+    window: 'fa-desktop',
     panel: 'fa-square',
+    canvas: 'fa-border-all',
     button: 'fa-mouse-pointer-square',
     text: 'fa-font',
-    image: 'fa-image',
     default: 'fa-cube'
 };
 
@@ -19,48 +18,26 @@ const fileBrowserIconMap = {
     default: 'fa-file'
 };
 
-// --- Hierarchy Rendering ---
+function buildTree(list, parentId) {
+    const children = list.filter(item => item.parentId === parentId);
+    if (children.length === 0) return null;
+
+    return children.map(child => ({
+        ...child,
+        children: buildTree(list, child.id)
+    }));
+}
+
 function renderHierarchy(rootElement, activeWindow) {
     rootElement.innerHTML = '';
-    if (!activeWindow) {
-        return;
-    }
+    if (!activeWindow) return;
+
     const topLevelUl = document.createElement('ul');
     topLevelUl.className = 'hierarchy-tree';
 
-    // Create the root item for the window itself
-    const windowLi = document.createElement('li');
-    windowLi.className = 'hierarchy-item';
-    // Use window's file ID for the dataset
-    windowLi.dataset.id = activeWindow.id;
+    const tree = buildTree(activeWindow.content, activeWindow.id);
 
-    const nameContainer = document.createElement('div');
-    nameContainer.className = 'name-container';
-
-    // Check if the window itself is the selected object
-    if (selectedObject && selectedObject.id === activeWindow.id) {
-         nameContainer.classList.add('selected');
-    }
-
-    const icon = document.createElement('i');
-    icon.className = `fas ${hierarchyIconMap[activeWindow.type] || hierarchyIconMap.default}`;
-    nameContainer.appendChild(icon);
-
-    const span = document.createElement('span');
-    span.textContent = activeWindow.name;
-    nameContainer.appendChild(span);
-
-    windowLi.appendChild(nameContainer);
-
-    // Populate the window's children
-    if (activeWindow.content && activeWindow.content.length > 0) {
-        const childrenContainer = document.createElement('ul');
-        childrenContainer.className = 'children-container';
-        populateHierarchy(childrenContainer, activeWindow.content);
-        windowLi.appendChild(childrenContainer);
-    }
-
-    topLevelUl.appendChild(windowLi);
+    populateHierarchy(topLevelUl, [{ ...activeWindow, children: tree }]);
     rootElement.appendChild(topLevelUl);
 }
 
@@ -69,21 +46,29 @@ function populateHierarchy(parentElement, items) {
         const li = document.createElement('li');
         li.className = 'hierarchy-item';
         li.dataset.id = item.id;
+
         const nameContainer = document.createElement('div');
         nameContainer.className = 'name-container';
-        if (selectedObject && selectedObject.id === item.id) {
+        if (item.id === selectedObjectId) {
             nameContainer.classList.add('selected');
         }
+
         const icon = document.createElement('i');
         icon.className = `fas ${hierarchyIconMap[item.type] || hierarchyIconMap.default}`;
         nameContainer.appendChild(icon);
+
         const span = document.createElement('span');
         span.textContent = item.name;
         nameContainer.appendChild(span);
-        const eyeIcon = document.createElement('i');
-        eyeIcon.className = `fas ${item.active ? 'fa-eye' : 'fa-eye-slash'} eye-icon`;
-        nameContainer.appendChild(eyeIcon);
+
+        if (item.type !== 'window') {
+            const eyeIcon = document.createElement('i');
+            eyeIcon.className = `fas ${item.active ? 'fa-eye' : 'fa-eye-slash'} eye-icon`;
+            nameContainer.appendChild(eyeIcon);
+        }
+
         li.appendChild(nameContainer);
+
         if (item.children && item.children.length > 0) {
             const childrenContainer = document.createElement('ul');
             childrenContainer.className = 'children-container';
@@ -94,7 +79,6 @@ function populateHierarchy(parentElement, items) {
     });
 }
 
-// --- File System Rendering ---
 function renderFileSystem(rootElement, fileSystemData) {
     rootElement.innerHTML = '';
     const topLevelUl = document.createElement('ul');
@@ -138,13 +122,14 @@ function populateTree(parentElement, items) {
     });
 }
 
-// --- View Rendering ---
-function renderView(viewElement, hierarchyData) {
+function renderView(viewElement, activeWindow) {
     viewElement.innerHTML = '';
-    if (!hierarchyData) {
-        return;
-    }
-    hierarchyData.forEach(item => {
+    if (!activeWindow || !activeWindow.content) return;
+
+    const elementsMap = new Map();
+
+    // First pass: create all elements and map them by ID
+    activeWindow.content.forEach(item => {
         if (!item.active) return;
         let element;
         switch (item.type) {
@@ -155,43 +140,70 @@ function renderView(viewElement, hierarchyData) {
             case 'text':
                 element = document.createElement('div');
                 element.textContent = item.name;
-                element.style.textAlign = 'center';
                 break;
             case 'panel':
+            case 'canvas':
+                element = document.createElement('div');
+                element.style.position = 'relative'; // Crucial for nesting
+                break;
             default:
                 element = document.createElement('div');
-                element.style.border = '1px solid #555';
-                element.style.boxSizing = 'border-box';
-                element.innerHTML = `<span style="color: #aaa; font-size: 12px; padding: 4px; pointer-events: none;">${item.name}</span>`;
                 break;
         }
         element.className = 'view-object';
         element.dataset.id = item.id;
-        const { position, rotation, scale } = item.transform;
-        element.style.position = 'absolute';
-        element.style.left = `calc(50% + ${position.x}px)`;
-        element.style.top = `calc(50% + ${position.y}px)`;
-        element.style.transform = `
-            translateX(-50%) translateY(-50%)
-            translateZ(${position.z}px)
-            rotateX(${rotation.x}deg) rotateY(${rotation.y}deg) rotateZ(${rotation.z}deg)
-            scaleX(${scale.x}) scaleY(${scale.y}) scaleZ(${scale.z})
-        `;
-        if (selectedObject && selectedObject.id === item.id) {
+        elementsMap.set(item.id, element);
+    });
+
+    // Second pass: apply styles and append to correct parent
+    activeWindow.content.forEach(item => {
+        if (!item.active) return;
+
+        const element = elementsMap.get(item.id);
+        if (!element) return;
+
+        // Apply styles based on type
+        if (item.type === 'canvas') {
+            element.style.width = '100%';
+            element.style.height = '100%';
+            element.style.position = 'absolute';
+            element.style.top = '0';
+            element.style.left = '0';
+            element.style.transform = ''; // No transform
+        } else {
+             const { position, rotation, scale } = item.transform;
+            element.style.position = 'absolute';
+            element.style.left = `calc(50% + ${position.x}px)`;
+            element.style.top = `calc(50% + ${position.y}px)`;
+            element.style.transform = `translateX(-50%) translateY(-50%) translateZ(${position.z}px) rotateX(${rotation.x}deg) rotateY(${rotation.y}deg) rotateZ(${rotation.z}deg) scale(${scale.x}, ${scale.y})`;
+        }
+
+        if (item.type === 'panel') {
+            element.style.width = `${item.size.width}px`;
+            element.style.height = `${item.size.height}px`;
+            element.style.backgroundColor = 'rgba(0, 0, 0, 0.2)';
+            element.style.border = '1px solid #555';
+        }
+
+        if (item.id === selectedObjectId) {
             element.classList.add('selected');
         }
-        viewElement.appendChild(element);
+
+        // Append to the correct parent
+        const parentElement = item.parentId === activeWindowId ? viewElement : elementsMap.get(item.parentId);
+        if (parentElement) {
+            parentElement.appendChild(element);
+        }
     });
 }
 
-/**
- * A master render function that updates the entire UI based on the current state.
- */
 function render() {
     const activeWindow = findItemById(fileSystem, activeWindowId);
 
     renderHierarchy(hierarchyContent, activeWindow);
     renderFileSystem(fileBrowserContent, fileSystem);
-    renderView(viewContent, activeWindow ? activeWindow.content : null);
+    renderView(viewContent, activeWindow);
+
+    const selectedObject = activeWindow ? (findItemById(activeWindow.content, selectedObjectId) || (selectedObjectId === activeWindowId ? activeWindow : null)) : null;
     renderInspector(selectedObject);
 }
