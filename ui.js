@@ -139,11 +139,10 @@ function renderView(viewElement, activeWindow) {
                 element.style.textAlign = 'center';
                 break;
             case 'button':
-                if (item.size) {
+                 if (item.size) {
                     element.style.width = `${item.size.width}px`;
                     element.style.height = `${item.size.height}px`;
                 }
-                element.style.backgroundColor = '#4a4a4a';
                 element.style.border = '1px solid #666';
                 element.style.borderRadius = '4px';
                 element.style.display = 'flex';
@@ -153,7 +152,6 @@ function renderView(viewElement, activeWindow) {
             case 'panel':
                 element.style.width = `${item.size.width}px`;
                 element.style.height = `${item.size.height}px`;
-                element.style.backgroundColor = 'rgba(0, 0, 0, 0.2)';
                 element.style.border = '1px solid #555';
                 break;
             case 'canvas':
@@ -164,6 +162,19 @@ function renderView(viewElement, activeWindow) {
                 element.style.left = '0';
                 element.style.transform = '';
                 break;
+        }
+
+        // Apply background styles
+        if (item.background) {
+            const { type, color, gradient, opacity } = item.background;
+            if (type === 'solid') {
+                element.style.background = hexToRgba(color, opacity);
+            } else if (type === 'gradient' && gradient.length > 0) {
+                const gradientColors = gradient.map(c => hexToRgba(c, opacity)).join(', ');
+                element.style.background = `linear-gradient(${gradientColors})`;
+            } else {
+                 element.style.background = 'transparent';
+            }
         }
 
         if (item.id === selectedObjectId) element.classList.add('selected');

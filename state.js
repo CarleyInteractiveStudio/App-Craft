@@ -29,7 +29,13 @@ const fileSystem = [
                         },
                         text: '¡Bienvenido a App Craft!',
                         fontSize: 24,
-                        color: '#FFFFFF'
+                        color: '#FFFFFF',
+                        background: {
+                            type: 'solid',
+                            color: '#555555',
+                            gradient: [],
+                            opacity: 0
+                        }
                     }
                 ],
                 nextHierarchyId: 102 // Next available ID

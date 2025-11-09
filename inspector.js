@@ -1,24 +1,63 @@
 const inspectorContent = document.querySelector('#inspector-panel .window-content');
 
-// Use event delegation on the main content area
-inspectorContent.addEventListener('input', (e) => {
-    if (e.target.tagName !== 'INPUT') return;
-
+function getSelectedObject() {
     const activeWindow = findItemById(fileSystem, activeWindowId);
-    if (!activeWindow) return;
+    if (!activeWindow) return null;
+    return findItemById(activeWindow.content, selectedObjectId);
+}
 
-    const selectedObject = findItemById(activeWindow.content, selectedObjectId);
+// --- Event Delegation for Inspector ---
+inspectorContent.addEventListener('input', (e) => {
+    const selectedObject = getSelectedObject();
     if (!selectedObject) return;
 
-    const property = e.target.dataset.property;
-    const axis = e.target.dataset.axis;
-    let value = e.target.value;
-
-    // Handle different input types
-    if (e.target.type === 'number') {
+    const target = e.target;
+    let value = target.value;
+    if (target.type === 'number' || target.type === 'range') {
         value = parseFloat(value);
         if (isNaN(value)) return;
     }
+
+    if (target.classList.contains('background-input')) {
+        handleBackgroundInput(target, selectedObject, value);
+    } else {
+        handleStandardInput(target, selectedObject, value);
+    }
+
+    render();
+});
+
+inspectorContent.addEventListener('change', (e) => {
+    const selectedObject = getSelectedObject();
+    if (!selectedObject) return;
+    const target = e.target;
+
+    if (target.tagName === 'SELECT' && target.classList.contains('background-input')) {
+        handleBackgroundInput(target, selectedObject, target.value);
+        render(); // Re-render to show/hide relevant fields
+    }
+});
+
+inspectorContent.addEventListener('click', (e) => {
+    const selectedObject = getSelectedObject();
+    if (!selectedObject) return;
+    const target = e.target;
+
+    if (target.classList.contains('add-color-btn')) {
+        selectedObject.background.gradient.push('#000000'); // Add a default color
+        render();
+    } else if (target.classList.contains('remove-color-btn')) {
+        const index = parseInt(target.dataset.index, 10);
+        if (selectedObject.background.gradient.length > 1) { // Ensure at least one color remains
+            selectedObject.background.gradient.splice(index, 1);
+            render();
+        }
+    }
+});
+
+function handleStandardInput(target, selectedObject, value) {
+    const property = target.dataset.property;
+    const axis = target.dataset.axis;
 
     if (property === 'size') {
         if (selectedObject.size) selectedObject.size[axis] = value;
@@ -27,9 +66,22 @@ inspectorContent.addEventListener('input', (e) => {
     } else if (selectedObject.transform && selectedObject.transform[property]) {
         selectedObject.transform[property][axis] = value;
     }
+}
 
-    render();
-});
+function handleBackgroundInput(target, selectedObject, value) {
+    const subProperty = target.dataset.subProperty;
+
+    if (subProperty === 'type') {
+        selectedObject.background.type = value;
+    } else if (subProperty === 'color') {
+        selectedObject.background.color = value;
+    } else if (subProperty === 'opacity') {
+        selectedObject.background.opacity = value;
+    } else if (subProperty === 'gradient') {
+        const index = parseInt(target.dataset.index, 10);
+        selectedObject.background.gradient[index] = value;
+    }
+}
 
 
 function renderInspector(item) {
@@ -88,7 +140,67 @@ function renderInspector(item) {
         </div>
     `;
 
-    inspectorContent.innerHTML = infoHTML + textHTML + transformHTML + sizeHTML;
+    let backgroundHTML = '';
+    if (item.background) {
+        backgroundHTML = createBackgroundInputs(item.background);
+    }
+
+    inspectorContent.innerHTML = infoHTML + textHTML + transformHTML + sizeHTML + backgroundHTML;
+}
+
+function createBackgroundInputs(background) {
+    const isSolid = background.type === 'solid';
+
+    const typeSelectorHTML = `
+        <div class="vector-input">
+            <label>Tipo</label>
+            <select class="background-input" data-sub-property="type">
+                <option value="solid" ${isSolid ? 'selected' : ''}>Sólido</option>
+                <option value="gradient" ${!isSolid ? 'selected' : ''}>Degradado</option>
+            </select>
+        </div>
+    `;
+
+    const solidColorHTML = `
+        <div class="vector-input solid-color-container" style="display: ${isSolid ? 'grid' : 'none'}">
+            <label>Color</label>
+            <input type="color" class="background-input" data-sub-property="color" value="${background.color}">
+        </div>
+    `;
+
+    const gradientColorsHTML = background.gradient.map((color, index) => `
+        <div class="vector-input gradient-color-stop">
+            <label>Color ${index + 1}</label>
+            <input type="color" class="background-input" data-sub-property="gradient" data-index="${index}" value="${color}">
+            <button class="remove-color-btn" data-index="${index}">-</button>
+        </div>
+    `).join('');
+
+    const gradientControlsHTML = `
+        <div class="gradient-controls-container" style="display: ${!isSolid ? 'block' : 'none'}">
+            ${gradientColorsHTML}
+            <button class="add-color-btn">+</button>
+        </div>
+    `;
+
+    const opacitySliderHTML = `
+        <div class="vector-input">
+            <label>Opacidad</label>
+            <input type="range" class="background-input" data-sub-property="opacity" min="0" max="1" step="0.01" value="${background.opacity}">
+        </div>
+    `;
+
+    return `
+        <div class="component">
+            <div class="component-header"><strong>Fondo</strong></div>
+            <div class="component-body">
+                ${typeSelectorHTML}
+                ${solidColorHTML}
+                ${gradientControlsHTML}
+                ${opacitySliderHTML}
+            </div>
+        </div>
+    `;
 }
 
 function createVectorInputs(label, vector, isDisabled = false) {

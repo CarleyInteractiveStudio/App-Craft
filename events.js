@@ -110,11 +110,18 @@ document.addEventListener('DOMContentLoaded', () => {
             id: activeWindow.nextHierarchyId++,
             parentId: parentId,
             active: true,
-            transform: { position: { x: 0, y: 0, z: 0 }, rotation: { x: 0, y: 0, z: 0 }, scale: { x: 1, y: 1, z: 1 } }
+            transform: { position: { x: 0, y: 0, z: 0 }, rotation: { x: 0, y: 0, z: 0 }, scale: { x: 1, y: 1, z: 1 } },
+            background: {
+                type: 'solid', // 'solid' or 'gradient'
+                color: '#555555',
+                gradient: ['#FF0000', '#0000FF'],
+                opacity: 1
+            }
         };
 
         if (type === 'button') {
             const buttonItem = { ...baseItem, name: 'Nuevo Botón', type: 'button', size: { width: 120, height: 40 } };
+            // Child text for a button should not have a visible background by default
             const textItem = {
                 id: activeWindow.nextHierarchyId++,
                 parentId: buttonItem.id,
@@ -122,7 +129,8 @@ document.addEventListener('DOMContentLoaded', () => {
                 type: 'text',
                 active: true,
                 transform: { position: { x: 0, y: 0, z: 0 }, rotation: { x: 0, y: 0, z: 0 }, scale: { x: 1, y: 1, z: 1 } },
-                text: 'Botón', fontSize: 16, color: '#FFFFFF'
+                text: 'Botón', fontSize: 16, color: '#FFFFFF',
+                background: { type: 'solid', color: '#555555', gradient: [], opacity: 0 }
             };
             activeWindow.content.push(buttonItem, textItem);
         } else {
@@ -135,6 +143,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     break;
                 case 'text':
                     baseItem.name = 'Nuevo Texto'; baseItem.type = 'text'; baseItem.text = 'Texto de ejemplo'; baseItem.fontSize = 16; baseItem.color = '#FFFFFF';
+                    baseItem.background.opacity = 0; // Standalone text is transparent by default
                     break;
             }
             activeWindow.content.push(baseItem);
