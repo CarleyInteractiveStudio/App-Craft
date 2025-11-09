@@ -140,3 +140,57 @@ body {
     flex-grow: 1;
     overflow: auto; /* For scrollable content later */
 }
+
+/* --- Context Menu --- */
+#context-menu {
+    display: none;
+    position: absolute;
+    z-index: 1000;
+    background-color: #2c2c2c;
+    border: 1px solid #444;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.5);
+    border-radius: 4px;
+    color: #ccc;
+}
+
+#context-menu ul {
+    list-style: none;
+    padding: 5px 0;
+    margin: 0;
+}
+
+#context-menu ul li {
+    padding: 8px 15px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 10px; /* Space between icon and text */
+}
+
+#context-menu ul li:hover {
+    background-color: #0078d4;
+    color: #fff;
+}
+
+/* --- File Browser Tree --- */
+.file-tree {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+.file-item .name-container {
+    display: flex;
+    align-items: center;
+    padding: 4px;
+    cursor: pointer;
+    gap: 8px;
+}
+
+.file-item .name-container:hover {
+    background-color: #383838;
+}
+
+.file-item .children-container {
+    padding-left: 20px; /* Indent nested items */
+}
