@@ -17,8 +17,30 @@ document.addEventListener('DOMContentLoaded', () => {
     ];
 
     const fileBrowserContent = document.querySelector('#files-panel .window-content');
-    let nextId = 3; // Start IDs from 3 since 1 and 2 are used
-    let lastClickedTarget = null; // To track where the context menu was opened
+
+    // --- State Management ---
+    let nextFileId = 3; // Start IDs from 3 since 1 and 2 are used for files
+    let lastClickedFileTarget = null; // To track where the file context menu was opened
+
+    // Represents the hierarchy of objects in the scene
+    const hierarchy = [
+        {
+            id: 1,
+            name: 'Panel Principal',
+            type: 'panel',
+            active: true,
+            children: [
+                {
+                    id: 2,
+                    name: 'Texto de Bienvenida',
+                    type: 'text',
+                    active: true,
+                    children: []
+                }
+            ]
+        }
+    ];
+    let nextHierarchyId = 3;
 
     /**
      * Populates a parent UL element with list items representing files and folders.
@@ -72,7 +94,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     /**
-     * Finds an item in the file system by its ID.
+     * Finds an item by its ID in a tree-like structure.
      * @param {Array} items The array of items to search in.
      * @param {number} id The ID of the item to find.
      * @returns {Object|null} The found item or null.
@@ -92,37 +114,112 @@ document.addEventListener('DOMContentLoaded', () => {
         return null;
     }
 
-    // Initial render
+    // --- Hierarchy Rendering ---
+    const hierarchyContent = document.querySelector('#hierarchy-panel .window-content');
+    const iconMap = {
+        panel: 'fa-square',
+        button: 'fa-mouse-pointer-square',
+        text: 'fa-font',
+        image: 'fa-image',
+        default: 'fa-cube'
+    };
+
+    function renderHierarchy(rootElement, hierarchyData) {
+        rootElement.innerHTML = '';
+        const topLevelUl = document.createElement('ul');
+        topLevelUl.className = 'hierarchy-tree';
+        populateHierarchy(topLevelUl, hierarchyData);
+        rootElement.appendChild(topLevelUl);
+    }
+
+    function populateHierarchy(parentElement, items) {
+        items.forEach(item => {
+            const li = document.createElement('li');
+            li.className = 'hierarchy-item';
+            li.dataset.id = item.id;
+
+            const nameContainer = document.createElement('div');
+            nameContainer.className = 'name-container';
+
+            const icon = document.createElement('i');
+            icon.className = `fas ${iconMap[item.type] || iconMap.default}`;
+            nameContainer.appendChild(icon);
+
+            const span = document.createElement('span');
+            span.textContent = item.name;
+            nameContainer.appendChild(span);
+
+            const eyeIcon = document.createElement('i');
+            eyeIcon.className = `fas ${item.active ? 'fa-eye' : 'fa-eye-slash'} eye-icon`;
+            nameContainer.appendChild(eyeIcon);
+
+            li.appendChild(nameContainer);
+
+            if (item.children && item.children.length > 0) {
+                const childrenContainer = document.createElement('ul');
+                childrenContainer.className = 'children-container';
+                populateHierarchy(childrenContainer, item.children);
+                li.appendChild(childrenContainer);
+            }
+            parentElement.appendChild(li);
+        });
+    }
+
+    // Initial renders
     renderFileSystem(fileBrowserContent, fileSystem);
+    renderHierarchy(hierarchyContent, hierarchy);
 
     // --- Context Menu Logic ---
-    const contextMenu = document.createElement('div');
-    contextMenu.id = 'context-menu';
-    contextMenu.innerHTML = `
+    const fileContextMenu = document.createElement('div');
+    fileContextMenu.id = 'file-context-menu';
+    fileContextMenu.className = 'context-menu'; // Generic class for styling
+    fileContextMenu.innerHTML = `
         <ul>
-            <li id="create-folder">
-                <i class="fas fa-folder-plus"></i> Crear Carpeta
-            </li>
-            <li id="create-script">
-                <i class="fas fa-file-alt"></i> Crear Script (.acs)
-            </li>
+            <li id="create-folder"><i class="fas fa-folder-plus"></i> Crear Carpeta</li>
+            <li id="create-script"><i class="fas fa-file-alt"></i> Crear Script (.acs)</li>
         </ul>
     `;
-    document.body.appendChild(contextMenu);
+    document.body.appendChild(fileContextMenu);
+
+    const hierarchyContextMenu = document.createElement('div');
+    hierarchyContextMenu.id = 'hierarchy-context-menu';
+    hierarchyContextMenu.className = 'context-menu'; // Generic class for styling
+    hierarchyContextMenu.innerHTML = `
+        <ul>
+            <li id="create-panel"><i class="fas fa-square"></i> Crear Panel</li>
+            <li id="create-button"><i class="fas fa-mouse-pointer-square"></i> Crear Botón</li>
+            <li id="create-text"><i class="fas fa-font"></i> Crear Texto</li>
+            <li id="create-image"><i class="fas fa-image"></i> Crear Imagen</li>
+        </ul>
+    `;
+    document.body.appendChild(hierarchyContextMenu);
 
     fileBrowserContent.addEventListener('contextmenu', (e) => {
         e.preventDefault();
-        lastClickedTarget = e.target.closest('.file-item'); // Get the li element
-        contextMenu.style.top = `${e.clientY}px`;
-        contextMenu.style.left = `${e.clientX}px`;
-        contextMenu.style.display = 'block';
+        hideAllContextMenus();
+        lastClickedFileTarget = e.target.closest('.file-item');
+        fileContextMenu.style.top = `${e.clientY}px`;
+        fileContextMenu.style.left = `${e.clientX}px`;
+        fileContextMenu.style.display = 'block';
     });
 
-    // Hide context menu on left-click
+    hierarchyContent.addEventListener('contextmenu', (e) => {
+        e.preventDefault();
+        hideAllContextMenus();
+        // lastClickedHierarchyTarget will be set here later
+        hierarchyContextMenu.style.top = `${e.clientY}px`;
+        hierarchyContextMenu.style.left = `${e.clientX}px`;
+        hierarchyContextMenu.style.display = 'block';
+    });
+
+    function hideAllContextMenus() {
+        fileContextMenu.style.display = 'none';
+        hierarchyContextMenu.style.display = 'none';
+    }
+
+    // Hide context menus on left-click
     window.addEventListener('click', () => {
-        if (contextMenu.style.display === 'block') {
-            contextMenu.style.display = 'none';
-        }
+        hideAllContextMenus();
     });
 
     document.getElementById('create-folder').addEventListener('click', () => {
@@ -130,15 +227,15 @@ document.addEventListener('DOMContentLoaded', () => {
         if (!folderName) return;
 
         const newFolder = {
-            id: nextId++,
+            id: nextFileId++,
             name: folderName,
             type: 'folder',
             children: []
         };
 
         let parentFolder = fileSystem; // Default to root
-        if (lastClickedTarget) {
-            const parentId = parseInt(lastClickedTarget.dataset.id, 10);
+        if (lastClickedFileTarget) {
+            const parentId = parseInt(lastClickedFileTarget.dataset.id, 10);
             const parentItem = findItemById(fileSystem, parentId);
             if (parentItem && parentItem.type === 'folder') {
                 parentFolder = parentItem.children;
@@ -154,15 +251,15 @@ document.addEventListener('DOMContentLoaded', () => {
         if (!scriptName) return;
 
         const newScript = {
-            id: nextId++,
+            id: nextFileId++,
             name: scriptName.endsWith('.acs') ? scriptName : `${scriptName}.acs`,
             type: 'script',
             children: []
         };
 
         let parentFolder = fileSystem; // Default to root
-        if (lastClickedTarget) {
-            const parentId = parseInt(lastClickedTarget.dataset.id, 10);
+        if (lastClickedFileTarget) {
+            const parentId = parseInt(lastClickedFileTarget.dataset.id, 10);
             const parentItem = findItemById(fileSystem, parentId);
              if (parentItem && parentItem.type === 'folder') {
                 parentFolder = parentItem.children;
@@ -171,6 +268,79 @@ document.addEventListener('DOMContentLoaded', () => {
 
         parentFolder.push(newScript);
         renderFileSystem(fileBrowserContent, fileSystem);
+    });
+
+    // --- Hierarchy Object Creation ---
+    function createHierarchyObject(type, name) {
+        const newItem = {
+            id: nextHierarchyId++,
+            name: name,
+            type: type,
+            active: true,
+            children: []
+        };
+        // For now, add all new items to the root level.
+        // Logic to add as a child of a selected item will be added later.
+        hierarchy.push(newItem);
+        renderHierarchy(hierarchyContent, hierarchy);
+    }
+
+    document.getElementById('create-panel').addEventListener('click', () => createHierarchyObject('panel', 'Nuevo Panel'));
+    document.getElementById('create-button').addEventListener('click', () => createHierarchyObject('button', 'Nuevo Botón'));
+    document.getElementById('create-text').addEventListener('click', () => createHierarchyObject('text', 'Nuevo Texto'));
+    document.getElementById('create-image').addEventListener('click', () => createHierarchyObject('image', 'Nueva Imagen'));
+
+    // --- Inspector Logic ---
+    const inspectorContent = document.querySelector('#inspector-panel .window-content');
+    let selectedHierarchyItem = null;
+
+    function renderInspector(item) {
+        inspectorContent.innerHTML = ''; // Clear previous content
+        if (!item) {
+            inspectorContent.innerHTML = '<p>No hay nada seleccionado.</p>';
+            return;
+        }
+
+        const html = `
+            <h4>${item.name}</h4>
+            <div class="component">
+                <strong>Estado:</strong>
+                <span>${item.active ? 'Activo' : 'Inactivo'}</span>
+            </div>
+            <div class="component">
+                <strong>Tipo:</strong>
+                <span>${item.type}</span>
+            </div>
+        `;
+        inspectorContent.innerHTML = html;
+    }
+
+    // --- Hierarchy Selection & Inspector Update ---
+    hierarchyContent.addEventListener('click', (e) => {
+        const nameContainer = e.target.closest('.hierarchy-item .name-container');
+        if (!nameContainer) return;
+
+        const itemId = parseInt(nameContainer.closest('.hierarchy-item').dataset.id, 10);
+        const clickedItem = findItemById(hierarchy, itemId);
+
+        if (e.target.classList.contains('eye-icon')) {
+            // --- Handle Active/Inactive Toggle ---
+            clickedItem.active = !clickedItem.active;
+            renderHierarchy(hierarchyContent, hierarchy); // Re-render to update eye icon
+            // If the toggled item is the selected one, update the inspector too
+            if (selectedHierarchyItem && selectedHierarchyItem.id === itemId) {
+                renderInspector(clickedItem);
+            }
+        } else {
+            // --- Handle Selection ---
+            const currentlySelected = document.querySelector('.hierarchy-item .name-container.selected');
+            if (currentlySelected) {
+                currentlySelected.classList.remove('selected');
+            }
+            nameContainer.classList.add('selected');
+            selectedHierarchyItem = clickedItem;
+            renderInspector(selectedHierarchyItem);
+        }
     });
 
     // --- Folder Expansion Logic ---

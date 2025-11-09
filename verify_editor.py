@@ -42,17 +42,28 @@ async def main():
         await page.click('#create-script')
         await page.wait_for_timeout(500) # Wait for re-render
 
-        # 5. Expand the tree to the final state for the screenshot
-        await page.click('//span[text()="Assets"]')
-        await page.wait_for_timeout(200)
-        await page.click('//span[text()="Test Folder"]')
-        await page.wait_for_timeout(200)
+        # --- Test Hierarchy Functionality ---
+        hierarchy_selector = '#hierarchy-panel .window-content'
 
-        # 6. Capture a screenshot of the final state
-        screenshot_path = 'verification/file_browser_expanded.png'
+        # 1. Create a new button
+        await page.click(hierarchy_selector, button='right')
+        await page.click('#create-button')
+        await page.wait_for_timeout(500)
+
+        # 2. Select the new button to show it in the inspector
+        button_item = page.locator('.hierarchy-item:has-text("Nuevo Botón")')
+        await button_item.click()
+        await page.wait_for_timeout(500)
+
+        # 3. Deactivate the button by clicking the eye icon
+        await button_item.locator('.eye-icon').click()
+        await page.wait_for_timeout(500)
+
+        # 4. Capture a screenshot of the final state
+        screenshot_path = 'verification/hierarchy_functionality.png'
         await page.screenshot(path=screenshot_path, full_page=True)
 
-        print(f"Captured screenshot of the expanded file browser at '{screenshot_path}'")
+        print(f"Captured screenshot of the hierarchy functionality at '{screenshot_path}'")
 
         await browser.close()
 
