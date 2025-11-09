@@ -123,7 +123,30 @@ body {
 }
 
 #view-panel .window-content {
-    background-color: transparent; /* As requested */
+    background-color: #111;
+    position: relative; /* Crucial for positioning children */
+    overflow: hidden; /* Hide parts of objects outside the view */
+    transform-style: preserve-3d; /* Enable 3D space */
+    perspective: 1000px; /* Creates a sense of depth */
+}
+
+.view-object {
+    position: absolute; /* Needed for transform to work */
+    top: 50%; /* Center the object's transform origin */
+    left: 50%;
+    transform-origin: center center;
+    padding: 10px 20px;
+    border-radius: 4px;
+    background-color: #3a3a3a;
+    color: #fff;
+    cursor: pointer;
+    border: 1px solid #555;
+    user-select: none; /* Prevent text selection */
+}
+
+.view-object.selected {
+    outline: 2px solid #00aaff;
+    box-shadow: 0 0 10px #00aaff;
 }
 
 .view-controls button {
@@ -229,9 +252,68 @@ body {
 }
 
 /* --- Inspector Panel --- */
-#inspector-panel .component {
-    background-color: #3c3c3c;
+.component {
+    background-color: #2a2a2a;
+    border: 1px solid #3c3c3c;
     border-radius: 4px;
-    padding: 10px;
     margin-bottom: 10px;
+    overflow: hidden; /* Ensure padding/border is respected */
+}
+
+.component-header {
+    background-color: #3c3c3c;
+    padding: 6px 10px;
+    font-size: 0.9em;
+}
+
+.component-body {
+    padding: 10px;
+    display: flex;
+    flex-direction: column;
+    gap: 8px; /* Space between rows */
+}
+
+.vector-input {
+    display: grid;
+    grid-template-columns: 60px 1fr; /* Label and fields */
+    align-items: center;
+    gap: 10px;
+}
+
+.vector-input label {
+    font-size: 0.9em;
+}
+
+.vector-input .fields {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 5px;
+    align-items: center;
+}
+
+.vector-input .fields span {
+    text-align: center;
+    color: #888;
+    font-size: 0.8em;
+}
+
+.vector-input .fields input {
+    width: 100%;
+    background-color: #1e1e1e;
+    color: #d4d4d4;
+    border: 1px solid #3c3c3c;
+    border-radius: 3px;
+    padding: 4px;
+    box-sizing: border-box; /* Include padding in width */
+    text-align: center;
+}
+
+/* Hide the default arrows on number inputs for a cleaner look */
+input[type=number]::-webkit-inner-spin-button,
+input[type=number]::-webkit-outer-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+input[type=number] {
+  -moz-appearance: textfield;
 }
