@@ -52,6 +52,12 @@ inspectorContent.addEventListener('click', (e) => {
             selectedObject.background.gradient.splice(index, 1);
             render();
         }
+    } else if (target.classList.contains('media-type-btn')) {
+        const mediaType = target.dataset.mediaType;
+        if (selectedObject.media) {
+            selectedObject.media.type = mediaType;
+            render();
+        }
     }
 });
 
@@ -107,7 +113,7 @@ function renderInspector(item) {
     }
 
     let sizeHTML = '';
-    if ((item.type === 'panel' || item.type === 'button') && item.size) {
+    if ((item.type === 'panel' || item.type === 'button' || item.type === 'media') && item.size) {
         sizeHTML = `
             <div class="component">
                 <div class="component-header"><strong>Size</strong></div>
@@ -145,7 +151,35 @@ function renderInspector(item) {
         backgroundHTML = createBackgroundInputs(item.background);
     }
 
-    inspectorContent.innerHTML = infoHTML + textHTML + transformHTML + sizeHTML + backgroundHTML;
+    let mediaHTML = '';
+    if (item.type === 'media' && item.media) {
+        mediaHTML = createMediaInputs(item.media);
+    }
+
+    inspectorContent.innerHTML = infoHTML + mediaHTML + textHTML + transformHTML + sizeHTML + backgroundHTML;
+}
+
+function createMediaInputs(media) {
+    const isImage = media.type === 'image';
+    return `
+        <div class="component">
+            <div class="component-header"><strong>Fuente Media</strong></div>
+            <div class="component-body">
+                <div class="media-type-selector">
+                    <button class="media-type-btn ${isImage ? 'active' : ''}" data-media-type="image">
+                        <i class="fas fa-image"></i> Imagen
+                    </button>
+                    <button class="media-type-btn ${!isImage ? 'active' : ''}" data-media-type="video">
+                        <i class="fas fa-video"></i> Video
+                    </button>
+                </div>
+                <div class="media-source-placeholder">
+                    <span>(Aún no funcional)</span>
+                    <p>Arrastra un archivo o haz clic para asignar.</p>
+                </div>
+            </div>
+        </div>
+    `;
 }
 
 function createBackgroundInputs(background) {

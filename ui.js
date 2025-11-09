@@ -4,7 +4,7 @@ const viewContent = document.querySelector('#view-panel .window-content');
 
 const hierarchyIconMap = {
     window: 'fa-desktop', panel: 'fa-square', canvas: 'fa-border-all',
-    button: 'fa-mouse-pointer-square', text: 'fa-font', default: 'fa-cube'
+    button: 'fa-mouse-pointer-square', text: 'fa-font', media: 'fa-photo-video', default: 'fa-cube'
 };
 const fileBrowserIconMap = {
     folder: 'fa-folder', script: 'fa-scroll', window: 'fa-desktop', default: 'fa-file'
@@ -150,6 +150,7 @@ function renderView(viewElement, activeWindow) {
                 element.style.justifyContent = 'center';
                 break;
             case 'panel':
+            case 'media':
                 element.style.width = `${item.size.width}px`;
                 element.style.height = `${item.size.height}px`;
                 element.style.border = '1px solid #555';

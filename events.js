@@ -25,6 +25,7 @@ document.addEventListener('DOMContentLoaded', () => {
             <li id="create-canvas"><i class="fas fa-border-all"></i> Crear Canvas</li>
             <li id="create-button"><i class="fas fa-mouse-pointer-square"></i> Crear Botón</li>
             <li id="create-text"><i class="fas fa-font"></i> Crear Texto</li>
+            <li id="create-media"><i class="fas fa-photo-video"></i> Crear Media</li>
             <hr/>
             <li id="delete-object" class="danger"><i class="fas fa-trash-alt"></i> Borrar</li>
         </ul>
@@ -145,6 +146,17 @@ document.addEventListener('DOMContentLoaded', () => {
                     baseItem.name = 'Nuevo Texto'; baseItem.type = 'text'; baseItem.text = 'Texto de ejemplo'; baseItem.fontSize = 16; baseItem.color = '#FFFFFF';
                     baseItem.background.opacity = 0; // Standalone text is transparent by default
                     break;
+                case 'media':
+                    baseItem.name = 'Nuevo Media';
+                    baseItem.type = 'media';
+                    baseItem.size = { width: 192, height: 108 }; // Default 16:9 ratio
+                    baseItem.background.color = '#FFFFFF';
+                    baseItem.background.opacity = 1;
+                    baseItem.media = {
+                        type: 'image', // 'image' or 'video'
+                        source: null
+                    };
+                    break;
             }
             activeWindow.content.push(baseItem);
         }
@@ -170,6 +182,7 @@ document.addEventListener('DOMContentLoaded', () => {
     document.getElementById('create-canvas').addEventListener('click', () => createHierarchyObject('canvas'));
     document.getElementById('create-button').addEventListener('click', () => createHierarchyObject('button'));
     document.getElementById('create-text').addEventListener('click', () => createHierarchyObject('text'));
+    document.getElementById('create-media').addEventListener('click', () => createHierarchyObject('media'));
     document.getElementById('delete-object').addEventListener('click', () => {
         if (lastClickedHierarchyId && lastClickedHierarchyId !== activeWindowId) {
             deleteObjectAndChildren(lastClickedHierarchyId);
