@@ -1,13 +1,14 @@
 document.addEventListener('DOMContentLoaded', () => {
-    // Initial render
+    let lastClickedFileTarget = null;
     render();
 
     // --- Context Menu Logic ---
     const fileContextMenu = document.createElement('div');
     fileContextMenu.id = 'file-context-menu';
-    fileContextMenu.className = 'context-menu'; // Generic class for styling
+    fileContextMenu.className = 'context-menu';
     fileContextMenu.innerHTML = `
         <ul>
+            <li id="create-window"><i class="fas fa-desktop"></i> Crear Ventana</li>
             <li id="create-folder"><i class="fas fa-folder-plus"></i> Crear Carpeta</li>
             <li id="create-script"><i class="fas fa-file-alt"></i> Crear Script (.acs)</li>
         </ul>
@@ -16,7 +17,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     const hierarchyContextMenu = document.createElement('div');
     hierarchyContextMenu.id = 'hierarchy-context-menu';
-    hierarchyContextMenu.className = 'context-menu'; // Generic class for styling
+    hierarchyContextMenu.className = 'context-menu';
     hierarchyContextMenu.innerHTML = `
         <ul>
             <li id="create-panel"><i class="fas fa-square"></i> Crear Panel</li>
@@ -39,6 +40,8 @@ document.addEventListener('DOMContentLoaded', () => {
     hierarchyContent.addEventListener('contextmenu', (e) => {
         e.preventDefault();
         hideAllContextMenus();
+        const activeWindow = findItemById(fileSystem, activeWindowId);
+        if (!activeWindow) return; // Disable context menu if no window is active
         hierarchyContextMenu.style.top = `${e.clientY}px`;
         hierarchyContextMenu.style.left = `${e.clientX}px`;
         hierarchyContextMenu.style.display = 'block';
@@ -49,63 +52,49 @@ document.addEventListener('DOMContentLoaded', () => {
         hierarchyContextMenu.style.display = 'none';
     }
 
-    // Hide context menus on left-click
-    window.addEventListener('click', () => {
-        hideAllContextMenus();
+    window.addEventListener('click', () => hideAllContextMenus());
+
+    // --- File Creation ---
+    document.getElementById('create-window').addEventListener('click', () => {
+        const name = prompt("Enter window name:", "Nueva Ventana");
+        if (!name) return;
+        const newFile = { id: nextFileId++, name, type: 'window', content: [], nextHierarchyId: 1 };
+        addItemToFolder(newFile);
     });
 
     document.getElementById('create-folder').addEventListener('click', () => {
-        const folderName = prompt("Enter folder name:", "New Folder");
-        if (!folderName) return;
+        const name = prompt("Enter folder name:", "New Folder");
+        if (!name) return;
+        const newFile = { id: nextFileId++, name, type: 'folder', expanded: true, children: [] };
+        addItemToFolder(newFile);
+    });
 
-        const newFolder = {
-            id: nextFileId++,
-            name: folderName,
-            type: 'folder',
-            children: []
-        };
+    document.getElementById('create-script').addEventListener('click', () => {
+        const name = prompt("Enter script name:", "NewScript.acs");
+        if (!name) return;
+        const newFile = { id: nextFileId++, name: name.endsWith('.acs') ? name : `${name}.acs`, type: 'script' };
+        addItemToFolder(newFile);
+    });
 
-        let parentFolder = fileSystem; // Default to root
+    function addItemToFolder(item) {
+        let parentFolder = fileSystem.find(i => i.type === 'folder'); // Default to first folder
         if (lastClickedFileTarget) {
             const parentId = parseInt(lastClickedFileTarget.dataset.id, 10);
             const parentItem = findItemById(fileSystem, parentId);
             if (parentItem && parentItem.type === 'folder') {
-                parentFolder = parentItem.children;
+                parentFolder = parentItem;
             }
         }
-
-        parentFolder.push(newFolder);
+        parentFolder.children.push(item);
         render();
-    });
-
-    document.getElementById('create-script').addEventListener('click', () => {
-        const scriptName = prompt("Enter script name:", "NewScript.acs");
-        if (!scriptName) return;
-
-        const newScript = {
-            id: nextFileId++,
-            name: scriptName.endsWith('.acs') ? scriptName : `${scriptName}.acs`,
-            type: 'script',
-            children: []
-        };
-
-        let parentFolder = fileSystem; // Default to root
-        if (lastClickedFileTarget) {
-            const parentId = parseInt(lastClickedFileTarget.dataset.id, 10);
-            const parentItem = findItemById(fileSystem, parentId);
-             if (parentItem && parentItem.type === 'folder') {
-                parentFolder = parentItem.children;
-            }
-        }
-
-        parentFolder.push(newScript);
-        render();
-    });
+    }
 
     // --- Hierarchy Object Creation ---
     function createHierarchyObject(type, name) {
+        const activeWindow = findItemById(fileSystem, activeWindowId);
+        if (!activeWindow) return;
         const newItem = {
-            id: nextHierarchyId++,
+            id: activeWindow.nextHierarchyId++,
             name: name,
             type: type,
             active: true,
@@ -116,7 +105,7 @@ document.addEventListener('DOMContentLoaded', () => {
             },
             children: []
         };
-        hierarchy.push(newItem);
+        activeWindow.content.push(newItem);
         render();
     }
 
@@ -125,13 +114,16 @@ document.addEventListener('DOMContentLoaded', () => {
     document.getElementById('create-text').addEventListener('click', () => createHierarchyObject('text', 'Nuevo Texto'));
     document.getElementById('create-image').addEventListener('click', () => createHierarchyObject('image', 'Nueva Imagen'));
 
-    // --- Hierarchy Selection & Inspector Update ---
+    // --- Hierarchy Selection ---
     hierarchyContent.addEventListener('click', (e) => {
+        const activeWindow = findItemById(fileSystem, activeWindowId);
+        if (!activeWindow) return;
+
         const nameContainer = e.target.closest('.hierarchy-item .name-container');
         if (!nameContainer) return;
 
         const itemId = parseInt(nameContainer.closest('.hierarchy-item').dataset.id, 10);
-        const clickedItem = findItemById(hierarchy, itemId);
+        const clickedItem = findItemById(activeWindow.content, itemId);
 
         if (e.target.classList.contains('eye-icon')) {
             clickedItem.active = !clickedItem.active;
@@ -143,64 +135,45 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // --- View Selection ---
     viewContent.addEventListener('click', (e) => {
-        // Deselect if clicking the background
+        const activeWindow = findItemById(fileSystem, activeWindowId);
+        if (!activeWindow) return;
+
         if (e.target === viewContent) {
             selectedObject = null;
             render();
             return;
         }
-
         const viewObject = e.target.closest('.view-object');
         if (viewObject) {
             const objectId = parseInt(viewObject.dataset.id, 10);
-            selectedObject = findItemById(hierarchy, objectId);
+            selectedObject = findItemById(activeWindow.content, objectId);
             render();
         }
     });
 
-    // --- Folder Expansion Logic ---
+    // --- File Browser Interactions ---
     fileBrowserContent.addEventListener('click', (e) => {
-        const target = e.target.closest('.name-container');
-        if (!target) return;
+        const nameContainer = e.target.closest('.name-container');
+        if (!nameContainer) return;
+        const fileId = parseInt(nameContainer.closest('.file-item').dataset.id, 10);
+        const fileItem = findItemById(fileSystem, fileId);
 
-        const parentLi = target.closest('.folder-item');
-        if (!parentLi) return;
-
-        const childrenContainer = parentLi.querySelector('.children-container');
-        const icon = target.querySelector('i.fas');
-
-        if (childrenContainer) {
-            const isExpanded = childrenContainer.style.display !== 'none';
-            childrenContainer.style.display = isExpanded ? 'none' : 'block';
-
-            if (isExpanded) {
-                icon.classList.remove('fa-folder-open');
-                icon.classList.add('fa-folder');
-            } else {
-                icon.classList.remove('fa-folder');
-                icon.classList.add('fa-folder-open');
-            }
+        if (fileItem && fileItem.type === 'folder') {
+            fileItem.expanded = !fileItem.expanded; // Toggle state
+            render();
         }
     });
 
-    /**
-     * Finds an item by its ID in a tree-like structure.
-     * @param {Array} items The array of items to search in.
-     * @param {number} id The ID of the item to find.
-     * @returns {Object|null} The found item or null.
-     */
-    function findItemById(items, id) {
-        for (const item of items) {
-            if (item.id === id) {
-                return item;
-            }
-            if (item.children && item.children.length > 0) {
-                const found = findItemById(item.children, id);
-                if (found) {
-                    return found;
-                }
-            }
+    fileBrowserContent.addEventListener('dblclick', (e) => {
+        const nameContainer = e.target.closest('.name-container');
+        if (!nameContainer) return;
+        const fileId = parseInt(nameContainer.closest('.file-item').dataset.id, 10);
+        const fileItem = findItemById(fileSystem, fileId);
+
+        if (fileItem && fileItem.type === 'window') {
+            activeWindowId = fileId;
+            selectedObject = null;
+            render();
         }
-        return null;
-    }
+    });
 });
