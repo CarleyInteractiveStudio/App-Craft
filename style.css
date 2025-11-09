@@ -286,8 +286,9 @@ body {
 
 .vector-input .fields {
     display: grid;
-    grid-template-columns: repeat(3, 1fr);
-    gap: 5px;
+    /* Give labels auto width and let inputs take up the rest of the space equally */
+    grid-template-columns: auto 1fr auto 1fr auto 1fr;
+    gap: 4px;
     align-items: center;
 }
 
