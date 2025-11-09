@@ -22,9 +22,11 @@ document.addEventListener('DOMContentLoaded', () => {
     hierarchyContextMenu.innerHTML = `
         <ul>
             <li id="create-panel"><i class="fas fa-square"></i> Crear Panel</li>
-            <li id="create-canvas"><i class="fas fa-image"></i> Crear Canvas</li>
+            <li id="create-canvas"><i class="fas fa-border-all"></i> Crear Canvas</li>
             <li id="create-button"><i class="fas fa-mouse-pointer-square"></i> Crear Botón</li>
             <li id="create-text"><i class="fas fa-font"></i> Crear Texto</li>
+            <hr/>
+            <li id="delete-object" class="danger"><i class="fas fa-trash-alt"></i> Borrar</li>
         </ul>
     `;
     document.body.appendChild(hierarchyContextMenu);
@@ -47,6 +49,9 @@ document.addEventListener('DOMContentLoaded', () => {
         const listItem = e.target.closest('.hierarchy-item');
         lastClickedHierarchyId = listItem ? parseInt(listItem.dataset.id, 10) : activeWindowId;
 
+        // Prevent deleting the root window object from the hierarchy view
+        document.getElementById('delete-object').style.display = lastClickedHierarchyId === activeWindowId ? 'none' : 'block';
+
         hierarchyContextMenu.style.top = `${e.clientY}px`;
         hierarchyContextMenu.style.left = `${e.clientX}px`;
         hierarchyContextMenu.style.display = 'block';
@@ -63,7 +68,7 @@ document.addEventListener('DOMContentLoaded', () => {
     document.getElementById('create-window').addEventListener('click', () => {
         const name = prompt("Enter window name:", "Nueva Ventana");
         if (!name) return;
-        const newFile = { id: nextFileId++, name, type: 'window', content: [], nextHierarchyId: 1 };
+        const newFile = { id: nextFileId++, name, type: 'window', content: [], nextHierarchyId: 101 };
         addItemToFolder(newFile);
     });
 
@@ -95,65 +100,85 @@ document.addEventListener('DOMContentLoaded', () => {
         render();
     }
 
-    // --- Hierarchy Object Creation ---
+    // --- Hierarchy Object Creation & Deletion ---
     function createHierarchyObject(type) {
         const activeWindow = findItemById(fileSystem, activeWindowId);
         if (!activeWindow) return;
-
         const parentId = lastClickedHierarchyId || activeWindowId;
 
         const baseItem = {
             id: activeWindow.nextHierarchyId++,
             parentId: parentId,
             active: true,
-            transform: {
-                position: { x: 0, y: 0, z: 0 },
-                rotation: { x: 0, y: 0, z: 0 },
-                scale: { x: 1, y: 1, z: 1 }
-            }
+            transform: { position: { x: 0, y: 0, z: 0 }, rotation: { x: 0, y: 0, z: 0 }, scale: { x: 1, y: 1, z: 1 } }
         };
 
-        switch (type) {
-            case 'panel':
-                baseItem.name = 'Nuevo Panel';
-                baseItem.type = 'panel';
-                baseItem.size = { width: 200, height: 150 };
-                break;
-            case 'canvas':
-                baseItem.name = 'Nuevo Canvas';
-                baseItem.type = 'canvas';
-                // Canvas has no size, it inherits from parent
-                break;
-            case 'button':
-                baseItem.name = 'Nuevo Botón';
-                baseItem.type = 'button';
-                break;
-            case 'text':
-                baseItem.name = 'Nuevo Texto';
-                baseItem.type = 'text';
-                break;
+        if (type === 'button') {
+            const buttonItem = { ...baseItem, name: 'Nuevo Botón', type: 'button', size: { width: 120, height: 40 } };
+            const textItem = {
+                id: activeWindow.nextHierarchyId++,
+                parentId: buttonItem.id,
+                name: 'Texto',
+                type: 'text',
+                active: true,
+                transform: { position: { x: 0, y: 0, z: 0 }, rotation: { x: 0, y: 0, z: 0 }, scale: { x: 1, y: 1, z: 1 } },
+                text: 'Botón', fontSize: 16, color: '#FFFFFF'
+            };
+            activeWindow.content.push(buttonItem, textItem);
+        } else {
+            switch (type) {
+                case 'panel':
+                    baseItem.name = 'Nuevo Panel'; baseItem.type = 'panel'; baseItem.size = { width: 200, height: 150 };
+                    break;
+                case 'canvas':
+                    baseItem.name = 'Nuevo Canvas'; baseItem.type = 'canvas';
+                    break;
+                case 'text':
+                    baseItem.name = 'Nuevo Texto'; baseItem.type = 'text'; baseItem.text = 'Texto de ejemplo'; baseItem.fontSize = 16; baseItem.color = '#FFFFFF';
+                    break;
+            }
+            activeWindow.content.push(baseItem);
+        }
+        render();
+    }
+
+    function deleteObjectAndChildren(objectId) {
+        const activeWindow = findItemById(fileSystem, activeWindowId);
+        if (!activeWindow) return;
+
+        const children = activeWindow.content.filter(obj => obj.parentId === objectId);
+        for (const child of children) {
+            deleteObjectAndChildren(child.id);
         }
 
-        activeWindow.content.push(baseItem);
-        render();
+        const index = activeWindow.content.findIndex(obj => obj.id === objectId);
+        if (index > -1) {
+            activeWindow.content.splice(index, 1);
+        }
     }
 
     document.getElementById('create-panel').addEventListener('click', () => createHierarchyObject('panel'));
     document.getElementById('create-canvas').addEventListener('click', () => createHierarchyObject('canvas'));
     document.getElementById('create-button').addEventListener('click', () => createHierarchyObject('button'));
     document.getElementById('create-text').addEventListener('click', () => createHierarchyObject('text'));
+    document.getElementById('delete-object').addEventListener('click', () => {
+        if (lastClickedHierarchyId && lastClickedHierarchyId !== activeWindowId) {
+            deleteObjectAndChildren(lastClickedHierarchyId);
+            if (selectedObjectId === lastClickedHierarchyId) {
+                selectedObjectId = null;
+            }
+            render();
+        }
+    });
 
     // --- Hierarchy Selection ---
     hierarchyContent.addEventListener('click', (e) => {
         const activeWindow = findItemById(fileSystem, activeWindowId);
         if (!activeWindow) return;
-
         const nameContainer = e.target.closest('.hierarchy-item .name-container');
         if (!nameContainer) return;
-
         const listItem = nameContainer.closest('.hierarchy-item');
         const itemId = parseInt(listItem.dataset.id, 10);
-
         const clickedItem = findItemById(activeWindow.content, itemId) || (itemId === activeWindowId ? activeWindow : null);
 
         if (e.target.classList.contains('eye-icon') && clickedItem && clickedItem.type !== 'window') {
@@ -187,7 +212,6 @@ document.addEventListener('DOMContentLoaded', () => {
         if (!nameContainer) return;
         const fileId = parseInt(nameContainer.closest('.file-item').dataset.id, 10);
         const fileItem = findItemById(fileSystem, fileId);
-
         if (fileItem && fileItem.type === 'folder') {
             fileItem.expanded = !fileItem.expanded;
             render();
@@ -199,7 +223,6 @@ document.addEventListener('DOMContentLoaded', () => {
         if (!nameContainer) return;
         const fileId = parseInt(nameContainer.closest('.file-item').dataset.id, 10);
         const fileItem = findItemById(fileSystem, fileId);
-
         if (fileItem && fileItem.type === 'window') {
             activeWindowId = fileId;
             selectedObjectId = null;

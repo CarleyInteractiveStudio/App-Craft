@@ -2,28 +2,30 @@ const inspectorContent = document.querySelector('#inspector-panel .window-conten
 
 // Use event delegation on the main content area
 inspectorContent.addEventListener('input', (e) => {
-    if (e.target.tagName !== 'INPUT' || e.target.type !== 'number') return;
+    if (e.target.tagName !== 'INPUT') return;
 
     const activeWindow = findItemById(fileSystem, activeWindowId);
     if (!activeWindow) return;
 
-    const selectedObject = findItemById(activeWindow.content, selectedObjectId) || (selectedObjectId === activeWindowId ? activeWindow : null);
+    const selectedObject = findItemById(activeWindow.content, selectedObjectId);
     if (!selectedObject) return;
 
-    const property = e.target.dataset.property; // "position", "rotation", "scale", or "size"
-    const axis = e.target.dataset.axis; // "x", "y", "z", "width", or "height"
-    const value = parseFloat(e.target.value);
+    const property = e.target.dataset.property;
+    const axis = e.target.dataset.axis;
+    let value = e.target.value;
 
-    if (isNaN(value)) return;
+    // Handle different input types
+    if (e.target.type === 'number') {
+        value = parseFloat(value);
+        if (isNaN(value)) return;
+    }
 
     if (property === 'size') {
-        if (selectedObject.size) {
-            selectedObject.size[axis] = value;
-        }
-    } else if (selectedObject.transform) {
-        if (selectedObject.transform[property]) {
-            selectedObject.transform[property][axis] = value;
-        }
+        if (selectedObject.size) selectedObject.size[axis] = value;
+    } else if (property === 'text' || property === 'fontSize' || property === 'color') {
+        selectedObject[property] = value;
+    } else if (selectedObject.transform && selectedObject.transform[property]) {
+        selectedObject.transform[property][axis] = value;
     }
 
     render();
@@ -53,12 +55,24 @@ function renderInspector(item) {
     }
 
     let sizeHTML = '';
-    if (item.type === 'panel' && item.size) {
+    if ((item.type === 'panel' || item.type === 'button') && item.size) {
         sizeHTML = `
             <div class="component">
                 <div class="component-header"><strong>Size</strong></div>
                 <div class="component-body">
                     ${createSizeInputs(item.size)}
+                </div>
+            </div>
+        `;
+    }
+
+    let textHTML = '';
+    if (item.type === 'text') {
+        textHTML = `
+            <div class="component">
+                <div class="component-header"><strong>Text</strong></div>
+                <div class="component-body">
+                    ${createTextInputs(item)}
                 </div>
             </div>
         `;
@@ -74,7 +88,7 @@ function renderInspector(item) {
         </div>
     `;
 
-    inspectorContent.innerHTML = infoHTML + transformHTML + sizeHTML;
+    inspectorContent.innerHTML = infoHTML + textHTML + transformHTML + sizeHTML;
 }
 
 function createVectorInputs(label, vector, isDisabled = false) {
@@ -99,6 +113,23 @@ function createSizeInputs(size) {
                 <span>W</span><input type="number" data-property="size" data-axis="width" value="${size.width}" step="1">
                 <span>H</span><input type="number" data-property="size" data-axis="height" value="${size.height}" step="1">
             </div>
+        </div>
+    `;
+}
+
+function createTextInputs(item) {
+    return `
+        <div class="text-input">
+            <label>Content</label>
+            <input type="text" data-property="text" value="${item.text}">
+        </div>
+        <div class="vector-input">
+            <label>Font Size</label>
+            <input type="number" data-property="fontSize" value="${item.fontSize}" step="1">
+        </div>
+        <div class="vector-input">
+            <label>Color</label>
+            <input type="color" data-property="color" value="${item.color}">
         </div>
     `;
 }

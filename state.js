@@ -15,24 +15,21 @@ const fileSystem = [
                 id: 3,
                 name: 'Ventana Principal',
                 type: 'window',
-                // The content is now a flat list of objects.
-                // The window itself is the root object.
                 content: [
                     {
-                        id: 101, // Unique ID for the panel
+                        id: 101,
                         parentId: 3, // Parent is the window object itself
-                        name: 'Panel Inicial',
-                        type: 'panel',
+                        name: 'Texto de Bienvenida',
+                        type: 'text',
                         active: true,
                         transform: {
                             position: { x: 0, y: 0, z: 0 },
                             rotation: { x: 0, y: 0, z: 0 },
                             scale: { x: 1, y: 1, z: 1 }
                         },
-                        size: {
-                            width: 400,
-                            height: 300
-                        }
+                        text: '¡Bienvenido a App Craft!',
+                        fontSize: 24,
+                        color: '#FFFFFF'
                     }
                 ],
                 nextHierarchyId: 102 // Next available ID
