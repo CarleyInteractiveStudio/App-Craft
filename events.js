@@ -41,7 +41,7 @@ document.addEventListener('DOMContentLoaded', () => {
         e.preventDefault();
         hideAllContextMenus();
         const activeWindow = findItemById(fileSystem, activeWindowId);
-        if (!activeWindow) return; // Disable context menu if no window is active
+        if (!activeWindow) return;
         hierarchyContextMenu.style.top = `${e.clientY}px`;
         hierarchyContextMenu.style.left = `${e.clientX}px`;
         hierarchyContextMenu.style.display = 'block';
@@ -77,7 +77,7 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 
     function addItemToFolder(item) {
-        let parentFolder = fileSystem.find(i => i.type === 'folder'); // Default to first folder
+        let parentFolder = fileSystem.find(i => i.type === 'folder');
         if (lastClickedFileTarget) {
             const parentId = parseInt(lastClickedFileTarget.dataset.id, 10);
             const parentItem = findItemById(fileSystem, parentId);
@@ -86,6 +86,7 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         }
         parentFolder.children.push(item);
+        parentFolder.expanded = true; // Ensure folder is expanded when item is added
         render();
     }
 
@@ -122,13 +123,19 @@ document.addEventListener('DOMContentLoaded', () => {
         const nameContainer = e.target.closest('.hierarchy-item .name-container');
         if (!nameContainer) return;
 
-        const itemId = parseInt(nameContainer.closest('.hierarchy-item').dataset.id, 10);
-        const clickedItem = findItemById(activeWindow.content, itemId);
+        const listItem = nameContainer.closest('.hierarchy-item');
+        const itemId = parseInt(listItem.dataset.id, 10);
 
-        if (e.target.classList.contains('eye-icon')) {
-            clickedItem.active = !clickedItem.active;
+        // Check if the clicked item is the window itself or an element within the window
+        if (itemId === activeWindow.id) {
+            selectedObject = activeWindow;
         } else {
-            selectedObject = clickedItem;
+            const clickedItem = findItemById(activeWindow.content, itemId);
+            if (e.target.classList.contains('eye-icon')) {
+                clickedItem.active = !clickedItem.active;
+            } else {
+                selectedObject = clickedItem;
+            }
         }
         render();
     });
@@ -159,7 +166,7 @@ document.addEventListener('DOMContentLoaded', () => {
         const fileItem = findItemById(fileSystem, fileId);
 
         if (fileItem && fileItem.type === 'folder') {
-            fileItem.expanded = !fileItem.expanded; // Toggle state
+            fileItem.expanded = !fileItem.expanded;
             render();
         }
     });

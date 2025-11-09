@@ -4,6 +4,7 @@ const viewContent = document.querySelector('#view-panel .window-content');
 
 // --- Icon Maps ---
 const hierarchyIconMap = {
+    window: 'fa-desktop', // Add window icon
     panel: 'fa-square',
     button: 'fa-mouse-pointer-square',
     text: 'fa-font',
@@ -19,14 +20,47 @@ const fileBrowserIconMap = {
 };
 
 // --- Hierarchy Rendering ---
-function renderHierarchy(rootElement, hierarchyData) {
+function renderHierarchy(rootElement, activeWindow) {
     rootElement.innerHTML = '';
-    if (!hierarchyData) {
+    if (!activeWindow) {
         return;
     }
     const topLevelUl = document.createElement('ul');
     topLevelUl.className = 'hierarchy-tree';
-    populateHierarchy(topLevelUl, hierarchyData);
+
+    // Create the root item for the window itself
+    const windowLi = document.createElement('li');
+    windowLi.className = 'hierarchy-item';
+    // Use window's file ID for the dataset
+    windowLi.dataset.id = activeWindow.id;
+
+    const nameContainer = document.createElement('div');
+    nameContainer.className = 'name-container';
+
+    // Check if the window itself is the selected object
+    if (selectedObject && selectedObject.id === activeWindow.id) {
+         nameContainer.classList.add('selected');
+    }
+
+    const icon = document.createElement('i');
+    icon.className = `fas ${hierarchyIconMap[activeWindow.type] || hierarchyIconMap.default}`;
+    nameContainer.appendChild(icon);
+
+    const span = document.createElement('span');
+    span.textContent = activeWindow.name;
+    nameContainer.appendChild(span);
+
+    windowLi.appendChild(nameContainer);
+
+    // Populate the window's children
+    if (activeWindow.content && activeWindow.content.length > 0) {
+        const childrenContainer = document.createElement('ul');
+        childrenContainer.className = 'children-container';
+        populateHierarchy(childrenContainer, activeWindow.content);
+        windowLi.appendChild(childrenContainer);
+    }
+
+    topLevelUl.appendChild(windowLi);
     rootElement.appendChild(topLevelUl);
 }
 
@@ -94,7 +128,6 @@ function populateTree(parentElement, items) {
             li.classList.add('folder-item');
             const childrenContainer = document.createElement('ul');
             childrenContainer.className = 'children-container';
-            // Use state to determine visibility
             childrenContainer.style.display = item.expanded ? 'block' : 'none';
             if (item.children && item.children.length > 0) {
                 populateTree(childrenContainer, item.children);
@@ -156,9 +189,9 @@ function renderView(viewElement, hierarchyData) {
  */
 function render() {
     const activeWindow = findItemById(fileSystem, activeWindowId);
-    const hierarchyData = activeWindow ? activeWindow.content : null;
-    renderHierarchy(hierarchyContent, hierarchyData);
+
+    renderHierarchy(hierarchyContent, activeWindow);
     renderFileSystem(fileBrowserContent, fileSystem);
-    renderView(viewContent, hierarchyData);
+    renderView(viewContent, activeWindow ? activeWindow.content : null);
     renderInspector(selectedObject);
 }
