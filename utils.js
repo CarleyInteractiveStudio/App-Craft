@@ -36,3 +36,24 @@ function hexToRgba(hex, alpha) {
     const b = parseInt(hex.slice(5, 7), 16);
     return `rgba(${r}, ${g}, ${b}, ${alpha})`;
 }
+
+/**
+ * Finds the first item of a specific type in a tree-like structure.
+ * @param {Array} items - The array of items to search in.
+ * @param {string} type - The type of the item to find.
+ * @returns {Object|null} The found item or null.
+ */
+function findItemByType(items, type) {
+    for (const item of items) {
+        if (item.type === type) {
+            return item;
+        }
+        if (item.children && item.children.length > 0) {
+            const found = findItemByType(item.children, type);
+            if (found) {
+                return found;
+            }
+        }
+    }
+    return null;
+}

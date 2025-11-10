@@ -70,9 +70,22 @@
         </main>
     </div>
     <script src="utils.js"></script>
+    <script src="fileSystemAPI.js"></script>
     <script src="state.js"></script>
     <script src="ui.js"></script>
     <script src="inspector.js"></script>
     <script src="events.js"></script>
+
+    <!-- Welcome Screen Modal -->
+    <div id="welcome-overlay" class="modal-overlay">
+        <div id="welcome-modal" class="modal">
+            <h2>Bienvenido a App Craft</h2>
+            <p>Selecciona una opción para empezar</p>
+            <div class="modal-actions">
+                <button id="create-project-btn"><i class="fas fa-plus-circle"></i> Crear Proyecto Nuevo</button>
+                <button id="open-project-btn"><i class="fas fa-folder-open"></i> Abrir Proyecto Existente</button>
+            </div>
+        </div>
+    </div>
 </body>
 </html>

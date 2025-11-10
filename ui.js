@@ -192,4 +192,9 @@ function render() {
     renderView(viewContent, activeWindow);
     const selectedObject = activeWindow ? (findItemById(activeWindow.content, selectedObjectId) || (selectedObjectId === activeWindowId ? activeWindow : null)) : null;
     renderInspector(selectedObject);
+
+    // Auto-save the active window on every render
+    if (activeWindow && projectHandle) {
+        saveWindowToFile(activeWindow);
+    }
 }

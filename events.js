@@ -1,7 +1,13 @@
 document.addEventListener('DOMContentLoaded', () => {
     let lastClickedFileTarget = null;
     let lastClickedHierarchyId = null;
-    render();
+    // render(); // Don't render initially, wait for project to be opened
+
+    // --- Welcome Screen Logic ---
+    const openProjectBtn = document.getElementById('open-project-btn');
+    const createProjectBtn = document.getElementById('create-project-btn');
+    openProjectBtn.addEventListener('click', openProject);
+    createProjectBtn.addEventListener('click', createProject);
 
     // --- Context Menu Logic ---
     const fileContextMenu = document.createElement('div');
