@@ -3,72 +3,33 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>App Craft Editor</title>
+    <title>App Craft Engine</title>
     <link rel="stylesheet" href="style.css">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/7.0.1/css/all.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 </head>
-<body>
-    <div class="editor-container">
-        <header id="top-bar">
-            <div class="app-title">App Craft - [Sin Proyecto]</div>
-            <nav class="menu">
-                <ul>
-                    <li>Archivo</li>
-                    <li>Editar</li>
-                    <li>Configuración</li>
-                    <li>Librerías</li>
-                    <li>Ayuda</li>
-                </ul>
-            </nav>
-        </header>
-        <main id="main-layout">
-            <aside id="left-panel">
-                <div id="hierarchy-panel" class="window">
-                    <div class="window-header">
-                        <span>Jerarquía</span>
-                        <button class="close-btn">X</button>
-                    </div>
-                    <div class="window-content">
-                        <!-- Content for hierarchy -->
-                    </div>
+<body class="dark-theme">
+    <div id="app">
+        <!-- Launcher Screen -->
+        <div id="launcher" class="screen">
+            <div class="launcher-content">
+                <h1>App Craft</h1>
+                <p>Diseña el futuro de la web</p>
+                <div class="launcher-actions">
+                    <button id="btn-new-project" class="primary-btn">
+                        <i class="fas fa-plus"></i> Nuevo Proyecto
+                    </button>
+                    <button id="btn-open-project" class="secondary-btn">
+                        <i class="fas fa-folder-open"></i> Abrir Proyecto
+                    </button>
                 </div>
-                <div id="files-panel" class="window">
-                    <div class="window-header">
-                        <span>Navegador de Archivos</span>
-                        <button class="close-btn">X</button>
-                    </div>
-                    <div class="window-content">
-                        <!-- Content for files -->
-                    </div>
-                </div>
-            </aside>
-            <section id="center-panel">
-                <div id="view-panel" class="window">
-                     <div class="window-header">
-                        <span>Vista</span>
-                        <div class="view-controls">
-                            <button>▶</button>
-                            <button>❚❚</button>
-                        </div>
-                    </div>
-                    <div class="window-content">
-                        <!-- The main view area -->
-                    </div>
-                </div>
-            </section>
-            <aside id="right-panel">
-                <div id="inspector-panel" class="window">
-                    <div class="window-header">
-                        <span>Inspector</span>
-                        <button class="close-btn">X</button>
-                    </div>
-                    <div class="window-content">
-                        <!-- Content for inspector -->
-                    </div>
-                </div>
-            </aside>
-        </main>
+            </div>
+        </div>
+
+        <!-- Editor Screen (Hidden by default) -->
+        <div id="editor" class="screen hidden">
+            <!-- Layout will be injected here -->
+        </div>
     </div>
-    <script src="script.js"></script>
+    <script type="module" src="src/main.js"></script>
 </body>
 </html>
