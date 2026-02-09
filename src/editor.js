@@ -51,6 +51,16 @@ export function initEditor(container, projectHandle) {
     setupViewModes();
     setupGizmos();
 
+    window.addEventListener('resize', () => {
+        const canvas = document.getElementById('canvas-container');
+        if (!canvas) return;
+        const applyAll = (el) => {
+            if (el.hasAttribute && el.hasAttribute('data-x')) window.editor.applyTransforms(el);
+            Array.from(el.children).forEach(applyAll);
+        };
+        applyAll(canvas);
+    });
+
     console.log("Editor inicializado para:", projectHandle.name);
 }
 
@@ -209,7 +219,9 @@ async function createNewScene() {
     <link rel="stylesheet" href="${cssName}">
 </head>
 <body>
-    <div id="root" class="ventana-principal active" data-component="Inicio">
+    <div id="root" class="ventana-principal active" data-component="Inicio"
+         data-x="0" data-y="0" data-rotation="0" data-scale="1"
+         data-anchor="1" data-anchored="false" data-scale-ui="false">
         <!-- Contenido de la escena -->
     </div>
 </body>
@@ -256,6 +268,14 @@ function renderSceneInView(content) {
     if (root) {
         const clonedRoot = root.cloneNode(true);
         canvas.appendChild(clonedRoot);
+
+        // Apply transforms to all objects
+        const applyAll = (el) => {
+            if (el.hasAttribute('data-x')) window.editor.applyTransforms(el);
+            Array.from(el.children).forEach(applyAll);
+        };
+        applyAll(clonedRoot);
+
         // We also need to update hierarchy
         updateHierarchy(clonedRoot);
     }
@@ -331,6 +351,15 @@ function createChildObject(parentEl, rootElement) {
     newObj.id = name.replace(/\s+/g, '-').toLowerCase();
     newObj.className = 'scene-object active';
     newObj.textContent = name;
+
+    // Position Component Defaults
+    newObj.setAttribute('data-x', '0');
+    newObj.setAttribute('data-y', '0');
+    newObj.setAttribute('data-rotation', '0');
+    newObj.setAttribute('data-scale', '1');
+    newObj.setAttribute('data-anchor', '1'); // Top-Left default
+    newObj.setAttribute('data-anchored', 'false');
+    newObj.setAttribute('data-scale-ui', 'false');
 
     parentEl.appendChild(newObj);
     updateHierarchy(rootElement);

@@ -64,14 +64,17 @@ function setupMoveLogic(handle, el, canvas) {
 
         const startX = e.clientX;
         const startY = e.clientY;
-        const startLeft = el.offsetLeft;
-        const startTop = el.offsetTop;
+        const startDataX = parseFloat(el.getAttribute('data-x') || 0);
+        const startDataY = parseFloat(el.getAttribute('data-y') || 0);
 
         const onMouseMove = (e) => {
             const dx = e.clientX - startX;
             const dy = e.clientY - startY;
-            el.style.left = `${startLeft + dx}px`;
-            el.style.top = `${startTop + dy}px`;
+
+            el.setAttribute('data-x', startDataX + dx);
+            el.setAttribute('data-y', startDataY + dy);
+
+            window.editor.applyTransforms(el);
             updateGizmoPosition();
         };
 
@@ -79,6 +82,8 @@ function setupMoveLogic(handle, el, canvas) {
             document.removeEventListener('mousemove', onMouseMove);
             document.removeEventListener('mouseup', onMouseUp);
             saveCurrentScene(canvas.firstChild);
+            // Update Inspector if it's open
+            import('./inspector.js').then(mod => mod.updateInspector(el.id));
         };
 
         document.addEventListener('mousemove', onMouseMove);
@@ -108,6 +113,8 @@ function setupResizeLogic(handle, el, canvas) {
             document.removeEventListener('mousemove', onMouseMove);
             document.removeEventListener('mouseup', onMouseUp);
             saveCurrentScene(canvas.firstChild);
+            // Update Inspector if it's open
+            import('./inspector.js').then(mod => mod.updateInspector(el.id));
         };
 
         document.addEventListener('mousemove', onMouseMove);
