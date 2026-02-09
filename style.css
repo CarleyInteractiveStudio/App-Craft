@@ -115,13 +115,15 @@ button:active {
 .panel {
     display: flex;
     flex-direction: column;
-    background-color: var(--bg-dark);
+    background: rgba(30, 30, 30, 0.8);
+    backdrop-filter: blur(10px);
     overflow: hidden;
 }
 
 .panel-header {
     height: var(--header-height);
-    background-color: var(--bg-light);
+    background: rgba(45, 45, 45, 0.5);
+    backdrop-filter: blur(5px);
     display: flex;
     align-items: center;
     padding: 0 10px;
@@ -205,7 +207,8 @@ button:active {
 }
 
 .view-tab.active {
-    background-color: var(--bg-darker);
+    background: rgba(18, 18, 18, 0.5);
+    backdrop-filter: blur(5px);
     color: var(--text-main);
     border-top: 2px solid var(--accent);
 }
@@ -221,4 +224,185 @@ button:active {
 
 .preview-mode .view-viewport {
     background-color: white; /* Simulate web view */
+}
+
+/* Glassmorphism Effect */
+.glass-effect {
+    background: rgba(30, 30, 30, 0.7);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
+}
+
+/* Context Menu */
+.context-menu {
+    position: fixed;
+    z-index: 10000;
+    min-width: 180px;
+    padding: 5px;
+    border-radius: 8px;
+    color: var(--text-main);
+    font-size: 0.9rem;
+    animation: fadeIn 0.1s ease-out;
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(-5px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+.context-menu-item {
+    padding: 8px 12px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    cursor: pointer;
+    border-radius: 4px;
+    transition: background 0.2s;
+}
+
+.context-menu-item:hover {
+    background: var(--accent);
+}
+
+.context-menu-item i {
+    width: 16px;
+    text-align: center;
+    color: var(--text-dim);
+}
+
+.context-menu-item:hover i {
+    color: white;
+}
+
+.context-menu-separator {
+    height: 1px;
+    background: rgba(255, 255, 255, 0.1);
+    margin: 5px 0;
+}
+
+/* Lists */
+.file-list, .hierarchy-list {
+    list-style: none;
+    padding: 5px;
+}
+
+.file-item, .hierarchy-item {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 4px 8px;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 0.85rem;
+    color: var(--text-main);
+    user-select: none;
+}
+
+.file-item:hover, .hierarchy-item:hover {
+    background-color: var(--bg-lighter);
+}
+
+.file-item.selected, .hierarchy-item.selected {
+    background-color: var(--accent);
+    color: white;
+}
+
+.inactive-text {
+    color: var(--text-dim);
+    font-style: italic;
+}
+
+/* Scene Objects in Editor */
+.scene-object {
+    padding: 10px;
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    background: rgba(255, 255, 255, 0.05);
+    color: white;
+    min-width: 50px;
+    min-height: 20px;
+    position: absolute; /* Default for manual positioning later */
+}
+
+.scene-object:not(.active) {
+    opacity: 0.3;
+    border-style: dashed;
+}
+
+/* Inspector */
+.inspector-section {
+    padding: 15px;
+    border-bottom: 1px solid var(--border);
+}
+
+.section-header {
+    font-size: 0.75rem;
+    font-weight: bold;
+    color: var(--accent);
+    margin-bottom: 10px;
+    text-transform: uppercase;
+}
+
+.inspector-row {
+    display: flex;
+    align-items: center;
+    margin-bottom: 8px;
+    gap: 10px;
+}
+
+.inspector-row label {
+    font-size: 0.8rem;
+    color: var(--text-dim);
+    width: 80px;
+}
+
+.inspector-row input[type="text"] {
+    flex-grow: 1;
+    background: var(--bg-darker);
+    border: 1px solid var(--border);
+    color: var(--text-main);
+    padding: 4px 8px;
+    border-radius: 4px;
+    font-size: 0.8rem;
+}
+
+.inspector-row input[type="text"]:focus {
+    border-color: var(--accent);
+    outline: none;
+}
+
+/* Gizmos */
+.gizmo-box {
+    position: absolute;
+    border: 2px solid var(--accent);
+    box-sizing: border-box;
+}
+
+.gizmo-move {
+    position: absolute;
+    top: -25px;
+    left: 50%;
+    transform: translateX(-50%);
+    background: var(--accent);
+    color: white;
+    width: 20px;
+    height: 20px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
+    font-size: 0.7rem;
+    cursor: move;
+}
+
+.gizmo-resize {
+    position: absolute;
+    bottom: -5px;
+    right: -5px;
+    width: 10px;
+    height: 10px;
+    background: var(--accent);
+    cursor: nwse-resize;
+    border-radius: 2px;
 }

@@ -11,10 +11,10 @@ export async function openProjectFolder() {
 export async function initProjectStructure(directoryHandle) {
     // Create 'assets' folder if it doesn't exist
     try {
-        await directoryHandle.getDirectoryHandle('assets', { create: true });
+        const assetsHandle = await directoryHandle.getDirectoryHandle('assets', { create: true });
 
-        // Create 'project-settings.json' if it doesn't exist
-        const settingsFileHandle = await directoryHandle.getFileHandle('project-settings.json', { create: true });
+        // Create 'project-settings.json' if it doesn't exist inside assets/
+        const settingsFileHandle = await assetsHandle.getFileHandle('project-settings.json', { create: true });
 
         // Initial settings if empty
         const file = await settingsFileHandle.getFile();
@@ -44,4 +44,27 @@ export async function listProjectFiles(directoryHandle) {
         });
     }
     return files;
+}
+
+export async function createFile(directoryHandle, fileName, content = "") {
+    try {
+        const fileHandle = await directoryHandle.getFileHandle(fileName, { create: true });
+        const writable = await fileHandle.createWritable();
+        await writable.write(content);
+        await writable.close();
+        return fileHandle;
+    } catch (error) {
+        console.error("Error creando archivo:", error);
+        return null;
+    }
+}
+
+export async function deleteFile(directoryHandle, fileName) {
+    try {
+        await directoryHandle.removeEntry(fileName);
+        return true;
+    } catch (error) {
+        console.error("Error eliminando archivo:", error);
+        return false;
+    }
 }

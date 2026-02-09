@@ -1,5 +1,6 @@
 import { openProjectFolder, initProjectStructure } from './fileSystem.js';
-import { initEditor, updateFileBrowser } from './editor.js';
+import { initEditor, updateFileBrowser, renameObject, toggleObjectState } from './editor.js';
+import { state } from './state.js';
 
 const launcher = document.getElementById('launcher');
 const editor = document.getElementById('editor');
@@ -28,8 +29,20 @@ btnNewProject.addEventListener('click', async () => {
 });
 
 async function startEditor(projectHandle) {
+    state.projectHandle = projectHandle;
     launcher.classList.add('hidden');
     editor.classList.remove('hidden');
+
+    window.editor = {
+        renameObject: (id, newName) => {
+            const el = document.getElementById('canvas-container').querySelector(`#${id}`);
+            if (el) renameObject(el, document.getElementById('canvas-container').firstChild, newName);
+        },
+        toggleObjectState: (id) => {
+            const el = document.getElementById('canvas-container').querySelector(`#${id}`);
+            if (el) toggleObjectState(el, document.getElementById('canvas-container').firstChild);
+        }
+    };
 
     initEditor(editor, projectHandle);
     await updateFileBrowser(projectHandle);
