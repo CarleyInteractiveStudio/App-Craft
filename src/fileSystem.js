@@ -1,3 +1,23 @@
+import { iconsLibrary } from './iconsLibrary.js';
+
+export async function restoreIcons(directoryHandle) {
+    try {
+        const assetsHandle = await directoryHandle.getDirectoryHandle('assets', { create: true });
+        const iconsHandle = await assetsHandle.getDirectoryHandle('icons', { create: true });
+
+        for (const [name, svg] of Object.entries(iconsLibrary)) {
+            const fileHandle = await iconsHandle.getFileHandle(`${name}.svg`, { create: true });
+            const writable = await fileHandle.createWritable();
+            await writable.write(svg);
+            await writable.close();
+        }
+        return true;
+    } catch (error) {
+        console.error("Error restaurando iconos:", error);
+        return false;
+    }
+}
+
 export async function openProjectFolder() {
     try {
         const directoryHandle = await window.showDirectoryPicker();
@@ -26,6 +46,9 @@ export async function initProjectStructure(directoryHandle) {
                 lastModified: new Date().toISOString()
             }, null, 2));
             await writable.close();
+
+            // Populate icons for new project
+            await restoreIcons(directoryHandle);
         }
 
         return true;

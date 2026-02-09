@@ -1,4 +1,4 @@
-import { openProjectFolder, initProjectStructure } from './fileSystem.js';
+import { openProjectFolder, initProjectStructure, restoreIcons } from './fileSystem.js';
 import { initEditor, updateFileBrowser, renameObject, toggleObjectState, saveCurrentScene } from './editor.js';
 import { state } from './state.js';
 import { updateInspector } from './inspector.js';
@@ -36,6 +36,18 @@ async function startEditor(projectHandle) {
     editor.classList.remove('hidden');
 
     window.editor = {
+        showProjectMenu: (e) => {
+            const items = [
+                { icon: 'fas fa-sync', label: 'Restaurar Iconos', action: async () => {
+                    if (confirm("¿Restaurar carpeta de iconos predeterminados?")) {
+                        await restoreIcons(state.projectHandle);
+                        updateFileBrowser(state.projectHandle);
+                        alert("Iconos restaurados.");
+                    }
+                }}
+            ];
+            import('./contextMenu.js').then(mod => mod.createContextMenu(e, items));
+        },
         renameObject: (id, newName) => {
             const el = document.getElementById('canvas-container').querySelector(`#${id}`);
             if (el) renameObject(el, document.getElementById('canvas-container').firstChild, newName);

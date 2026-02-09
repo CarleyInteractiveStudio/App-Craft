@@ -6,6 +6,16 @@ import { setupGizmos } from './gizmos.js';
 
 export function initEditor(container, projectHandle) {
     container.innerHTML = `
+        <header id="editor-top-bar" class="glass-effect">
+            <div class="top-bar-left">
+                <div class="engine-logo"><i class="fas fa-cube"></i> App Craft</div>
+                <div class="project-name">${projectHandle.name}</div>
+            </div>
+            <nav class="top-bar-menu">
+                <div class="menu-item" onclick="window.editor.showProjectMenu(event)">Configuración</div>
+            </nav>
+        </header>
+        <div id="editor-main-layout">
         <div id="left-panel" class="panel">
             <div id="hierarchy-panel" class="sub-panel">
                 <div class="panel-header">Jerarquía</div>
@@ -41,9 +51,10 @@ export function initEditor(container, projectHandle) {
             <div class="panel-header">Inspector</div>
             <div class="panel-content" id="inspector-content">
                 <div style="padding: 20px; color: var(--text-dim); font-size: 0.8rem;">
-                    <i class="fas fa-check-circle" style="color: #2ecc71;"></i> Proyecto guardado localmente
+                    Selecciona un objeto para ver sus propiedades.
                 </div>
             </div>
+        </div>
         </div>
     `;
 
@@ -185,6 +196,9 @@ export async function updateFileBrowser(projectHandle) {
             if (file.name.endsWith('.html')) {
                 const handle = await projectHandle.getFileHandle(file.name);
                 openScene(handle);
+            } else if (file.name.endsWith('.svg')) {
+                const handle = await projectHandle.getFileHandle(file.name);
+                selectAsset(handle);
             }
         };
 
@@ -259,6 +273,20 @@ async function createNewScene() {
     await createFile(state.projectHandle, htmlName, htmlContent);
     await createFile(state.projectHandle, cssName, cssContent);
     updateFileBrowser(state.projectHandle);
+}
+
+async function selectAsset(handle) {
+    setSelectedObject(null); // Deselect objects
+    const file = await handle.getFile();
+    const content = await file.text();
+
+    import('./inspector.js').then(mod => mod.updateInspector(null, {
+        type: 'asset',
+        name: handle.name,
+        content: content,
+        size: file.size,
+        lastModified: new Date(file.lastModified).toLocaleString()
+    }));
 }
 
 async function openScene(handle) {

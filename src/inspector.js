@@ -1,7 +1,13 @@
 import { state } from './state.js';
 
-export function updateInspector(objectId) {
+export function updateInspector(objectId, assetData = null) {
     const inspectorContent = document.getElementById('inspector-content');
+
+    if (assetData) {
+        renderAssetInspector(inspectorContent, assetData);
+        return;
+    }
+
     if (!objectId) {
         inspectorContent.innerHTML = '<div style="padding: 20px; color: var(--text-dim);">Selecciona un objeto para ver sus propiedades</div>';
         return;
@@ -114,4 +120,26 @@ export function updateInspector(objectId) {
     }
 
     inspectorContent.innerHTML = html;
+}
+
+function renderAssetInspector(container, data) {
+    let previewHtml = '';
+    if (data.name.endsWith('.svg')) {
+        previewHtml = `
+            <div class="asset-preview-container">
+                <div class="asset-preview-svg">${data.content}</div>
+            </div>
+        `;
+    }
+
+    container.innerHTML = `
+        <div class="inspector-section">
+            <div class="section-header">Recurso: ${data.name}</div>
+            ${previewHtml}
+            <div class="asset-info">
+                <div class="info-row"><label>Tamaño:</label><span>${(data.size / 1024).toFixed(2)} KB</span></div>
+                <div class="info-row"><label>Modificado:</label><span>${data.lastModified}</span></div>
+            </div>
+        </div>
+    `;
 }
