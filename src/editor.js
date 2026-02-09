@@ -281,7 +281,7 @@ function renderSceneInView(content) {
     }
 }
 
-function updateHierarchy(rootElement) {
+export function updateHierarchy(rootElement) {
     const hierarchyContent = document.getElementById('hierarchy-content');
     hierarchyContent.innerHTML = '';
 
@@ -382,7 +382,7 @@ export function toggleObjectState(el, rootElement) {
     saveCurrentScene(rootElement);
 }
 
-async function saveCurrentScene(rootElement) {
+export async function saveCurrentScene(rootElement) {
     if (!state.activeSceneHandle) return;
 
     // We need to rebuild the full HTML document
