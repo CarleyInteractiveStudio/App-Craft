@@ -160,68 +160,95 @@ function setupResizers() {
     });
 }
 
+const expandedFolders = new Set(['root']);
+
 export async function updateFileBrowser(projectHandle) {
     const filesContent = document.getElementById('files-content');
-    const files = await listProjectFiles(projectHandle);
-
     filesContent.innerHTML = '';
-    const list = document.createElement('ul');
-    list.className = 'file-list';
 
-    files.forEach(file => {
-        if (file.name.endsWith('.css')) return; // Hide CSS files
+    const renderDirectory = async (directoryHandle, container, level = 0, path = 'root') => {
+        const files = await listProjectFiles(directoryHandle);
+        const list = document.createElement('ul');
+        list.className = 'file-list';
+        list.style.paddingLeft = level > 0 ? '12px' : '0px';
 
-        const item = document.createElement('li');
-        item.className = 'file-item';
+        for (const file of files) {
+            if (file.name.endsWith('.css')) continue;
 
-        const icon = document.createElement('i');
-        if (file.kind === 'directory') {
-            icon.className = 'fas fa-folder';
-            icon.style.color = '#f1c40f';
-        } else if (file.name.endsWith('.js')) {
-            icon.className = 'fab fa-js-square';
-            icon.style.color = '#f7df1e';
-        } else {
-            icon.className = 'fas fa-file-code';
-            icon.style.color = '#3498db';
-        }
+            const item = document.createElement('li');
+            item.className = 'file-item';
+            const currentPath = `${path}/${file.name}`;
 
-        const nameSpan = document.createElement('span');
-        nameSpan.textContent = file.name;
+            const icon = document.createElement('i');
+            if (file.kind === 'directory') {
+                const isExpanded = expandedFolders.has(currentPath);
+                icon.className = isExpanded ? 'fas fa-folder-open' : 'fas fa-folder';
+                icon.style.color = '#f1c40f';
 
-        item.appendChild(icon);
-        item.appendChild(nameSpan);
-
-        item.onclick = async () => {
-            if (file.name.endsWith('.html')) {
-                const handle = await projectHandle.getFileHandle(file.name);
-                openScene(handle);
+                item.onclick = (e) => {
+                    e.stopPropagation();
+                    if (isExpanded) expandedFolders.delete(currentPath);
+                    else expandedFolders.add(currentPath);
+                    updateFileBrowser(projectHandle);
+                    selectDirectory(file.handle);
+                };
+            } else if (file.name.endsWith('.js')) {
+                icon.className = 'fab fa-js-square';
+                icon.style.color = '#f7df1e';
             } else if (file.name.endsWith('.svg')) {
-                const handle = await projectHandle.getFileHandle(file.name);
-                selectAsset(handle);
+                icon.className = 'fas fa-file-image';
+                icon.style.color = '#e67e22';
+            } else {
+                icon.className = 'fas fa-file-code';
+                icon.style.color = '#3498db';
             }
-        };
 
-        item.oncontextmenu = (e) => {
-            e.preventDefault();
-            e.stopPropagation();
-            createContextMenu(e, [
-                { icon: 'fas fa-trash', label: 'Eliminar', action: async () => {
-                    if (confirm(`¿Eliminar ${file.name}?`)) {
-                        await deleteFile(projectHandle, file.name);
-                        updateFileBrowser(projectHandle);
-                    }
-                }}
-            ]);
-        };
+            const nameSpan = document.createElement('span');
+            nameSpan.textContent = file.name;
 
-        list.appendChild(item);
-    });
+            item.appendChild(icon);
+            item.appendChild(nameSpan);
 
-    filesContent.appendChild(list);
+            if (file.kind !== 'directory') {
+                item.onclick = (e) => {
+                    e.stopPropagation();
+                    if (file.name.endsWith('.html')) openScene(file.handle);
+                    else if (file.name.endsWith('.svg')) selectAsset(file.handle);
+                };
+            }
+
+            item.oncontextmenu = (e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                createContextMenu(e, [
+                    { icon: 'fas fa-trash', label: 'Eliminar', action: async () => {
+                        if (confirm(`¿Eliminar ${file.name}?`)) {
+                            if (file.kind === 'directory') {
+                                await directoryHandle.removeEntry(file.name, { recursive: true });
+                            } else {
+                                await deleteFile(directoryHandle, file.name);
+                            }
+                            updateFileBrowser(projectHandle);
+                        }
+                    }}
+                ]);
+            };
+
+            list.appendChild(item);
+
+            if (file.kind === 'directory' && expandedFolders.has(currentPath)) {
+                const subContainer = document.createElement('div');
+                await renderDirectory(file.handle, subContainer, level + 1, currentPath);
+                list.appendChild(subContainer);
+            }
+        }
+        container.appendChild(list);
+    };
+
+    await renderDirectory(projectHandle, filesContent);
 
     filesContent.oncontextmenu = (e) => {
-        if (e.target === filesContent || e.target === list) {
+        if (e.target === filesContent) {
             e.preventDefault();
             createContextMenu(e, [
                 { icon: 'fas fa-plus', label: 'Nueva Escena (HTML)', action: () => createNewScene() },
@@ -273,6 +300,14 @@ async function createNewScene() {
     await createFile(state.projectHandle, htmlName, htmlContent);
     await createFile(state.projectHandle, cssName, cssContent);
     updateFileBrowser(state.projectHandle);
+}
+
+async function selectDirectory(handle) {
+    setSelectedObject(null);
+    import('./inspector.js').then(mod => mod.updateInspector(null, {
+        type: 'directory',
+        name: handle.name
+    }));
 }
 
 async function selectAsset(handle) {

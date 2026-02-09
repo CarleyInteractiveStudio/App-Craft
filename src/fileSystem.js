@@ -2,15 +2,26 @@ import { iconsLibrary } from './iconsLibrary.js';
 
 export async function restoreIcons(directoryHandle) {
     try {
+        console.log("Iniciando restauración de iconos...");
         const assetsHandle = await directoryHandle.getDirectoryHandle('assets', { create: true });
         const iconsHandle = await assetsHandle.getDirectoryHandle('icons', { create: true });
 
-        for (const [name, svg] of Object.entries(iconsLibrary)) {
-            const fileHandle = await iconsHandle.getFileHandle(`${name}.svg`, { create: true });
-            const writable = await fileHandle.createWritable();
-            await writable.write(svg);
-            await writable.close();
+        const entries = Object.entries(iconsLibrary);
+        let restoredCount = 0;
+
+        for (const [name, svg] of entries) {
+            try {
+                // We overwrite to ensure they are the latest ones
+                const fileHandle = await iconsHandle.getFileHandle(`${name}.svg`, { create: true });
+                const writable = await fileHandle.createWritable();
+                await writable.write(svg);
+                await writable.close();
+                restoredCount++;
+            } catch (err) {
+                console.warn(`No se pudo restaurar el icono ${name}:`, err);
+            }
         }
+        console.log(`Restauración completada: ${restoredCount} iconos.`);
         return true;
     } catch (error) {
         console.error("Error restaurando iconos:", error);
@@ -63,10 +74,15 @@ export async function listProjectFiles(directoryHandle) {
     for await (const entry of directoryHandle.values()) {
         files.push({
             name: entry.name,
-            kind: entry.kind
+            kind: entry.kind,
+            handle: entry
         });
     }
-    return files;
+    // Sort directories first, then by name
+    return files.sort((a, b) => {
+        if (a.kind === b.kind) return a.name.localeCompare(b.name);
+        return a.kind === 'directory' ? -1 : 1;
+    });
 }
 
 export async function createFile(directoryHandle, fileName, content = "") {

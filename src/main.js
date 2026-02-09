@@ -39,10 +39,14 @@ async function startEditor(projectHandle) {
         showProjectMenu: (e) => {
             const items = [
                 { icon: 'fas fa-sync', label: 'Restaurar Iconos', action: async () => {
-                    if (confirm("¿Restaurar carpeta de iconos predeterminados?")) {
-                        await restoreIcons(state.projectHandle);
-                        updateFileBrowser(state.projectHandle);
-                        alert("Iconos restaurados.");
+                    if (confirm("¿Restaurar carpeta de iconos predeterminados? Esto puede tardar unos segundos.")) {
+                        const success = await restoreIcons(state.projectHandle);
+                        if (success) {
+                            await updateFileBrowser(state.projectHandle);
+                            alert("Biblioteca de iconos restaurada correctamente en assets/icons/");
+                        } else {
+                            alert("Hubo un error al restaurar los iconos.");
+                        }
                     }
                 }}
             ];

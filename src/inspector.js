@@ -124,6 +124,19 @@ export function updateInspector(objectId, assetData = null) {
 
 function renderAssetInspector(container, data) {
     let previewHtml = '';
+    if (data.type === 'directory') {
+        container.innerHTML = `
+            <div class="inspector-section">
+                <div class="section-header">Carpeta: ${data.name}</div>
+                <div style="padding: 20px; text-align: center; color: var(--text-dim);">
+                    <i class="fas fa-folder-open" style="font-size: 3rem; margin-bottom: 10px; display: block; color: #f1c40f;"></i>
+                    Información de directorio
+                </div>
+            </div>
+        `;
+        return;
+    }
+
     if (data.name.endsWith('.svg')) {
         previewHtml = `
             <div class="asset-preview-container">
