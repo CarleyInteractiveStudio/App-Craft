@@ -91,6 +91,10 @@ button:active {
     color: white;
 }
 
+.fab.fa-js-square {
+    font-size: 1.1rem;
+}
+
 .primary-btn:hover {
     background-color: var(--accent-hover);
 }
@@ -334,6 +338,55 @@ button:active {
 .inspector-section {
     padding: 15px;
     border-bottom: 1px solid var(--border);
+    transition: opacity 0.2s;
+}
+
+.inspector-header {
+    display: flex;
+    gap: 10px;
+    align-items: center;
+}
+
+.object-name-input {
+    flex-grow: 1;
+    background: transparent;
+    border: none;
+    border-bottom: 1px solid var(--border);
+    color: var(--text-main);
+    font-size: 1rem;
+    font-weight: bold;
+    padding: 5px 0;
+}
+
+.object-name-input:focus {
+    outline: none;
+    border-bottom-color: var(--accent);
+}
+
+.toggle-btn, .comp-toggle-btn {
+    background: transparent;
+    border: none;
+    color: var(--text-dim);
+    cursor: pointer;
+    font-size: 1rem;
+    transition: color 0.2s;
+    padding: 5px;
+}
+
+.toggle-btn.active {
+    color: #2ecc71;
+}
+
+.comp-toggle-btn.active {
+    color: var(--accent);
+}
+
+.component-inactive {
+    opacity: 0.5;
+}
+
+.component-inactive .inspector-row {
+    pointer-events: none;
 }
 
 .section-header {
@@ -342,6 +395,9 @@ button:active {
     color: var(--accent);
     margin-bottom: 10px;
     text-transform: uppercase;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
 }
 
 .inspector-row {

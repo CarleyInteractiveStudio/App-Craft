@@ -158,12 +158,22 @@ export async function updateFileBrowser(projectHandle) {
     list.className = 'file-list';
 
     files.forEach(file => {
+        if (file.name.endsWith('.css')) return; // Hide CSS files
+
         const item = document.createElement('li');
         item.className = 'file-item';
 
         const icon = document.createElement('i');
-        icon.className = file.kind === 'directory' ? 'fas fa-folder' : 'fas fa-file-code';
-        icon.style.color = file.kind === 'directory' ? '#f1c40f' : '#3498db';
+        if (file.kind === 'directory') {
+            icon.className = 'fas fa-folder';
+            icon.style.color = '#f1c40f';
+        } else if (file.name.endsWith('.js')) {
+            icon.className = 'fab fa-js-square';
+            icon.style.color = '#f7df1e';
+        } else {
+            icon.className = 'fas fa-file-code';
+            icon.style.color = '#3498db';
+        }
 
         const nameSpan = document.createElement('span');
         nameSpan.textContent = file.name;
@@ -200,10 +210,22 @@ export async function updateFileBrowser(projectHandle) {
         if (e.target === filesContent || e.target === list) {
             e.preventDefault();
             createContextMenu(e, [
-                { icon: 'fas fa-plus', label: 'Nueva Escena (HTML)', action: () => createNewScene() }
+                { icon: 'fas fa-plus', label: 'Nueva Escena (HTML)', action: () => createNewScene() },
+                { icon: 'fab fa-js', label: 'Nuevo Script (JS)', action: () => createNewScript() }
             ]);
         }
     };
+}
+
+async function createNewScript() {
+    const name = prompt("Nombre del script:", "NuevoScript");
+    if (!name) return;
+
+    const fileName = `${name}.js`;
+    const content = `// Lógica para ${name}\nconsole.log("${name} cargado");`;
+
+    await createFile(state.projectHandle, fileName, content);
+    updateFileBrowser(state.projectHandle);
 }
 
 async function createNewScene() {

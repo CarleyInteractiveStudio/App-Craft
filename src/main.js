@@ -44,6 +44,70 @@ async function startEditor(projectHandle) {
             const el = document.getElementById('canvas-container').querySelector(`#${id}`);
             if (el) toggleObjectState(el, document.getElementById('canvas-container').firstChild);
         },
+        toggleComponent: (objId, componentName) => {
+            const el = document.getElementById('canvas-container').querySelector(`#${objId}`);
+            if (el) {
+                const attr = componentName === 'Posición' ? 'data-pos-active' : 'data-inicio-active';
+                const current = el.getAttribute(attr) !== 'false';
+                el.setAttribute(attr, !current);
+                updateInspector(objId);
+                saveCurrentScene(document.getElementById('canvas-container').firstChild);
+            }
+        },
+        showComponentMenu: (e, objId, componentName) => {
+            e.preventDefault();
+            const el = document.getElementById('canvas-container').querySelector(`#${objId}`);
+            if (!el) return;
+
+            const items = [
+                { icon: 'fas fa-copy', label: 'Copiar', action: () => {
+                    state.copiedComponent = {
+                        name: componentName,
+                        attributes: {}
+                    };
+                    if (componentName === 'Posición') {
+                        ['data-x', 'data-y', 'data-rotation', 'data-scale', 'data-anchor', 'data-anchored', 'data-scale-ui'].forEach(attr => {
+                            state.copiedComponent.attributes[attr] = el.getAttribute(attr);
+                        });
+                    }
+                    console.log("Componente copiado:", componentName);
+                }},
+                { icon: 'fas fa-paste', label: 'Pegar', action: () => {
+                    if (state.copiedComponent && state.copiedComponent.name === componentName) {
+                        Object.entries(state.copiedComponent.attributes).forEach(([attr, val]) => {
+                            el.setAttribute(attr, val);
+                        });
+                        window.editor.applyTransforms(el);
+                        updateInspector(objId);
+                        saveCurrentScene(document.getElementById('canvas-container').firstChild);
+                    }
+                }},
+                { separator: true },
+                { icon: 'fas fa-undo', label: 'Restablecer', action: () => {
+                    if (componentName === 'Posición') {
+                        el.setAttribute('data-x', '0');
+                        el.setAttribute('data-y', '0');
+                        el.setAttribute('data-rotation', '0');
+                        el.setAttribute('data-scale', '1');
+                        el.setAttribute('data-anchor', '1');
+                        el.setAttribute('data-anchored', 'false');
+                        el.setAttribute('data-scale-ui', 'false');
+                        window.editor.applyTransforms(el);
+                    }
+                    updateInspector(objId);
+                    saveCurrentScene(document.getElementById('canvas-container').firstChild);
+                }},
+                { icon: 'fas fa-trash', label: 'Eliminar', action: () => {
+                    if (componentName !== 'Inicio') {
+                        // Logic to remove component attributes if we had multiple components
+                        // For now, Posición and Inicio are standard
+                        alert("Este componente no se puede eliminar ya que es esencial.");
+                    }
+                }}
+            ];
+
+            import('./contextMenu.js').then(mod => mod.createContextMenu(e, items));
+        },
         updateObjectAttribute: (id, attr, value) => {
             const el = document.getElementById('canvas-container').querySelector(`#${id}`);
             if (el) {

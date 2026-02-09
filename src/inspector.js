@@ -28,18 +28,25 @@ export function updateInspector(objectId) {
 
     let html = `
         <div class="inspector-section">
-            <div class="inspector-row">
-                <label>Nombre</label>
-                <input type="text" value="${el.id}" onchange="window.editor.renameObject('${el.id}', this.value)">
-            </div>
-            <div class="inspector-row">
-                <label>Activo</label>
-                <input type="checkbox" ${isActive ? 'checked' : ''} onchange="window.editor.toggleObjectState('${el.id}')">
+            <div class="inspector-header">
+                <input type="text" class="object-name-input" value="${el.id}" onchange="window.editor.renameObject('${el.id}', this.value)">
+                <button class="toggle-btn ${isActive ? 'active' : ''}" title="Activar/Desactivar Objeto" onclick="window.editor.toggleObjectState('${el.id}')">
+                    <i class="fas fa-power-off"></i>
+                </button>
             </div>
         </div>
+    `;
 
-        <div class="inspector-section">
-            <div class="section-header">Posición</div>
+    if (!isRoot) {
+        const posActive = el.getAttribute('data-pos-active') !== 'false';
+        html += `
+        <div class="inspector-section ${posActive ? '' : 'component-inactive'}" oncontextmenu="window.editor.showComponentMenu(event, '${el.id}', 'Posición')">
+            <div class="section-header">
+                <span>Posición</span>
+                <button class="comp-toggle-btn ${posActive ? 'active' : ''}" onclick="window.editor.toggleComponent('${el.id}', 'Posición')">
+                    <i class="fas fa-toggle-${posActive ? 'on' : 'off'}"></i>
+                </button>
+            </div>
 
             <div class="inspector-row">
                 <label>Anclaje</label>
@@ -85,14 +92,20 @@ export function updateInspector(objectId) {
                 <input type="checkbox" ${scaleUI ? 'checked' : ''}
                        onchange="window.editor.updateObjectAttribute('${el.id}', 'data-scale-ui', this.checked)">
             </div>
-        </div>
-    `;
+        </div>`;
+    }
 
     // Components
     if (isRoot) {
+        const inicioActive = el.getAttribute('data-inicio-active') !== 'false';
         html += `
-            <div class="inspector-section">
-                <div class="section-header">Componente: Inicio</div>
+            <div class="inspector-section ${inicioActive ? '' : 'component-inactive'}" oncontextmenu="window.editor.showComponentMenu(event, '${el.id}', 'Inicio')">
+                <div class="section-header">
+                    <span>Componente: Inicio</span>
+                    <button class="comp-toggle-btn ${inicioActive ? 'active' : ''}" onclick="window.editor.toggleComponent('${el.id}', 'Inicio')">
+                        <i class="fas fa-toggle-${inicioActive ? 'on' : 'off'}"></i>
+                    </button>
+                </div>
                 <div style="padding: 10px; font-size: 0.8rem; color: var(--text-dim);">
                     Este es el componente raíz que inicia la escena.
                 </div>

@@ -4,6 +4,7 @@ export const state = {
     activeSceneContent: null, // The document fragment or string of the current scene
     selectedObjectId: null,
     scenes: [], // List of scene handles
+    copiedComponent: null,
 };
 
 export function setSelectedObject(id) {
