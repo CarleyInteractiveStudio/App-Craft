@@ -57,6 +57,11 @@ export function updateInspector(objectId, assetData = null) {
                 <div style="padding: 10px; font-size: 0.8rem; color: var(--text-dim);">
                     Este es el componente raíz que inicia la escena.
                 </div>
+
+                <div class="inspector-row">
+                    <label>Fondo</label>
+                    <input type="color" value="${el.getAttribute('data-inicio-bg') || '#ffffff'}" onchange="window.editor.updateObjectAttribute('${el.id}', 'data-inicio-bg', this.value)">
+                </div>
             </div>
         `;
     }
@@ -148,6 +153,11 @@ export function updateInspector(objectId, assetData = null) {
                     <button title="Mayúsculas" class="${el.getAttribute('data-text-transform') === 'uppercase' ? 'active' : ''}" onclick="window.editor.updateObjectAttribute('${el.id}', 'data-text-transform', 'uppercase')">ABC</button>
                     <button title="Minúsculas" class="${el.getAttribute('data-text-transform') === 'lowercase' ? 'active' : ''}" onclick="window.editor.updateObjectAttribute('${el.id}', 'data-text-transform', 'lowercase')">abc</button>
                 </div>
+            </div>
+
+            <div class="inspector-row">
+                <label>Color</label>
+                <input type="color" value="${el.getAttribute('data-text-color') || '#ffffff'}" onchange="window.editor.updateObjectAttribute('${el.id}', 'data-text-color', this.value)">
             </div>
 
             <div class="inspector-row">

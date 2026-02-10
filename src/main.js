@@ -86,6 +86,7 @@ async function startEditor(projectHandle) {
                 items.push({ icon: 'fas fa-font', label: 'Texto', action: () => {
                     el.setAttribute('data-text-active', 'true');
                     el.setAttribute('data-text-content', el.id);
+                    el.setAttribute('data-text-color', '#ffffff');
                     el.setAttribute('data-text-transform', 'none');
                     el.setAttribute('data-text-align', 'left');
                     el.setAttribute('data-font-family', 'inherit');
@@ -129,7 +130,7 @@ async function startEditor(projectHandle) {
                             state.copiedComponent.attributes[attr] = el.getAttribute(attr);
                         });
                     } else if (componentName === 'Texto') {
-                        ['data-text-content', 'data-text-transform', 'data-text-align', 'data-font-family'].forEach(attr => {
+                        ['data-text-content', 'data-text-color', 'data-text-transform', 'data-text-align', 'data-font-family'].forEach(attr => {
                             state.copiedComponent.attributes[attr] = el.getAttribute(attr);
                         });
                     } else if (componentName === 'Filtro') {
@@ -162,6 +163,7 @@ async function startEditor(projectHandle) {
                         window.editor.applyTransforms(el);
                     } else if (componentName === 'Texto') {
                         el.setAttribute('data-text-content', el.id);
+                        el.setAttribute('data-text-color', '#ffffff');
                         el.setAttribute('data-text-transform', 'none');
                         el.setAttribute('data-text-align', 'left');
                         el.setAttribute('data-font-family', 'inherit');
@@ -175,7 +177,7 @@ async function startEditor(projectHandle) {
                 }},
                 { icon: 'fas fa-trash', label: 'Eliminar', action: () => {
                     if (componentName === 'Texto') {
-                        ['data-text-active', 'data-text-content', 'data-text-transform', 'data-text-align', 'data-font-family'].forEach(a => el.removeAttribute(a));
+                        ['data-text-active', 'data-text-content', 'data-text-color', 'data-text-transform', 'data-text-align', 'data-font-family'].forEach(a => el.removeAttribute(a));
                     } else if (componentName === 'Filtro') {
                         ['data-filter-active', 'data-filter-color', 'data-filter-blur', 'data-filter-opacity'].forEach(a => el.removeAttribute(a));
                     } else {
@@ -274,28 +276,31 @@ async function startEditor(projectHandle) {
                 el.style.textAlign = el.getAttribute('data-text-align') || 'left';
                 el.style.textTransform = el.getAttribute('data-text-transform') || 'none';
                 el.style.fontFamily = el.getAttribute('data-font-family') || 'inherit';
-
-                // Filter color applies to text if text is active
-                if (filterActive) {
-                    el.style.color = filterColor;
-                    el.style.backgroundColor = 'transparent';
-                } else {
-                    el.style.color = 'white'; // Default
-                }
-            } else {
+                el.style.color = el.getAttribute('data-text-color') || 'white';
+            } else if (el.hasAttribute('data-text-active')) {
                 el.textContent = '';
-                if (filterActive) {
-                    el.style.backgroundColor = filterColor;
-                } else {
-                    el.style.backgroundColor = 'transparent';
+            }
+
+            // Inicio Component (Global settings like Background)
+            if (isRoot) {
+                const inicioActive = el.getAttribute('data-inicio-active') !== 'false';
+                if (inicioActive) {
+                    const bgColor = el.getAttribute('data-inicio-bg');
+                    el.style.backgroundColor = bgColor || '#ffffff';
                 }
             }
 
-            // Common Filter Styles
+            // Filter Component (Background, Blur, Opacity)
             if (filterActive) {
-                el.style.filter = `blur(${el.getAttribute('data-filter-blur') || 0}px)`;
-                el.style.opacity = el.getAttribute('data-filter-opacity') || 1;
-            } else {
+                const blur = el.getAttribute('data-filter-blur');
+                const opacity = el.getAttribute('data-filter-opacity');
+
+                el.style.backgroundColor = filterColor;
+
+                el.style.filter = `blur(${blur !== null ? blur : 0}px)`;
+                el.style.opacity = (opacity !== null && opacity !== '') ? opacity : 1;
+            } else if (el.hasAttribute('data-filter-active')) {
+                if (!isRoot) el.style.backgroundColor = 'transparent';
                 el.style.filter = 'none';
                 el.style.opacity = 1;
             }

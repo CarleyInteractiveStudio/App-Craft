@@ -286,7 +286,7 @@ async function createNewScene() {
     <link rel="stylesheet" href="${cssName}">
 </head>
 <body>
-    <div id="root" class="ventana-principal active" data-inicio-active="true">
+    <div id="root" class="ventana-principal active" data-inicio-active="true" data-inicio-bg="#ffffff">
         <!-- Contenido de la escena -->
     </div>
 </body>
@@ -464,7 +464,14 @@ export function renameObject(el, rootElement, newName = null) {
         newName = prompt("Nuevo nombre:", el.id || el.tagName);
     }
     if (!newName) return;
-    el.id = newName.replace(/\s+/g, '-').toLowerCase();
+    const newId = newName.replace(/\s+/g, '-').toLowerCase();
+
+    // Update selection if this object was selected
+    if (state.selectedObjectId === el.id) {
+        setSelectedObject(newId);
+    }
+
+    el.id = newId;
     updateHierarchy(rootElement);
     saveCurrentScene(rootElement);
 }
