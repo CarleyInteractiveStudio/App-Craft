@@ -61,16 +61,18 @@ async function startEditor(projectHandle) {
             if (el) toggleObjectState(el, document.getElementById('canvas-container').firstChild);
         },
         toggleComponent: (objId, componentName) => {
+            if (componentName === 'Posición') return; // Cannot deactivate Position
+
             const el = document.getElementById('canvas-container').querySelector(`#${objId}`);
             if (el) {
                 let attr;
-                if (componentName === 'Posición') attr = 'data-pos-active';
-                else if (componentName === 'Inicio') attr = 'data-inicio-active';
+                if (componentName === 'Inicio') attr = 'data-inicio-active';
                 else if (componentName === 'Texto') attr = 'data-text-active';
                 else if (componentName === 'Filtro') attr = 'data-filter-active';
 
                 const current = el.getAttribute(attr) !== 'false';
                 el.setAttribute(attr, !current);
+                window.editor.applyTransforms(el);
                 updateInspector(objId);
                 saveCurrentScene(document.getElementById('canvas-container').firstChild);
             }

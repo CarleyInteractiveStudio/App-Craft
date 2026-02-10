@@ -44,14 +44,10 @@ export function updateInspector(objectId, assetData = null) {
     `;
 
     if (!isRoot) {
-        const posActive = el.getAttribute('data-pos-active') !== 'false';
         html += `
-        <div class="inspector-section ${posActive ? '' : 'component-inactive'}" oncontextmenu="window.editor.showComponentMenu(event, '${el.id}', 'Posición')">
+        <div class="inspector-section" oncontextmenu="window.editor.showComponentMenu(event, '${el.id}', 'Posición')">
             <div class="section-header">
                 <span>Posición</span>
-                <button class="comp-toggle-btn ${posActive ? 'active' : ''}" onclick="window.editor.toggleComponent('${el.id}', 'Posición')">
-                    <i class="fas fa-toggle-${posActive ? 'on' : 'off'}"></i>
-                </button>
             </div>
 
             <div class="inspector-row">
