@@ -372,12 +372,26 @@ button:active {
 /* Scene Objects in Editor */
 .scene-object {
     padding: 10px;
-    border: 1px solid rgba(255, 255, 255, 0.2);
-    background: rgba(255, 255, 255, 0.05);
     color: white;
     min-width: 50px;
     min-height: 20px;
-    position: absolute; /* Default for manual positioning later */
+    position: absolute;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+/* Empty object visual aid in editor */
+.edition-mode #canvas-container div:not([data-text-active="true"]):not([data-filter-active="true"]) {
+    border: 1px dashed rgba(255, 255, 255, 0.3);
+}
+
+.edition-mode #canvas-container div:not([data-text-active="true"]):not([data-filter-active="true"])::after {
+    content: "\f24a"; /* Mouse pointer icon from fontawesome */
+    font-family: "Font Awesome 6 Free";
+    font-weight: 900;
+    font-size: 0.8rem;
+    opacity: 0.5;
 }
 
 .scene-object:not(.active) {
@@ -438,6 +452,16 @@ button:active {
 
 .component-inactive .inspector-row {
     pointer-events: none;
+}
+
+.add-comp-section {
+    display: flex;
+    justify-content: center;
+    padding: 20px;
+}
+
+.add-comp-btn {
+    width: 80%;
 }
 
 .section-header {

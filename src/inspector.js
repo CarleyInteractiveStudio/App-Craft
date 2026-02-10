@@ -102,8 +102,9 @@ export function updateInspector(objectId, assetData = null) {
     }
 
     // Text Component
-    const textActive = el.getAttribute('data-text-active') !== 'false';
-    html += `
+    if (el.hasAttribute('data-text-content')) {
+        const textActive = el.getAttribute('data-text-active') !== 'false';
+        html += `
         <div class="inspector-section ${textActive ? '' : 'component-inactive'}" oncontextmenu="window.editor.showComponentMenu(event, '${el.id}', 'Texto')">
             <div class="section-header">
                 <span>Texto</span>
@@ -146,10 +147,12 @@ export function updateInspector(objectId, assetData = null) {
             </div>
         </div>
     `;
+    }
 
     // Filter Component
-    const filterActive = el.getAttribute('data-filter-active') !== 'false';
-    html += `
+    if (el.hasAttribute('data-filter-color')) {
+        const filterActive = el.getAttribute('data-filter-active') !== 'false';
+        html += `
         <div class="inspector-section ${filterActive ? '' : 'component-inactive'}" oncontextmenu="window.editor.showComponentMenu(event, '${el.id}', 'Filtro')">
             <div class="section-header">
                 <span>Filtro</span>
@@ -176,6 +179,18 @@ export function updateInspector(objectId, assetData = null) {
             </div>
         </div>
     `;
+    }
+
+    // Add Component Button
+    if (!isRoot) {
+        html += `
+            <div class="inspector-section add-comp-section">
+                <button class="primary-btn add-comp-btn" onclick="window.editor.showAddComponentMenu(event, '${el.id}')">
+                    <i class="fas fa-plus"></i> Añadir Componente
+                </button>
+            </div>
+        `;
+    }
 
     // Components
     if (isRoot) {

@@ -75,6 +75,42 @@ async function startEditor(projectHandle) {
                 saveCurrentScene(document.getElementById('canvas-container').firstChild);
             }
         },
+        showAddComponentMenu: (e, objId) => {
+            const el = document.getElementById('canvas-container').querySelector(`#${objId}`);
+            if (!el) return;
+
+            const items = [];
+            if (!el.hasAttribute('data-text-content')) {
+                items.push({ icon: 'fas fa-font', label: 'Texto', action: () => {
+                    el.setAttribute('data-text-active', 'true');
+                    el.setAttribute('data-text-content', el.id);
+                    el.setAttribute('data-text-transform', 'none');
+                    el.setAttribute('data-text-align', 'left');
+                    el.setAttribute('data-font-family', 'inherit');
+                    window.editor.applyTransforms(el);
+                    updateInspector(objId);
+                    saveCurrentScene(document.getElementById('canvas-container').firstChild);
+                }});
+            }
+            if (!el.hasAttribute('data-filter-color')) {
+                items.push({ icon: 'fas fa-magic', label: 'Filtro', action: () => {
+                    el.setAttribute('data-filter-active', 'true');
+                    el.setAttribute('data-filter-color', 'transparent');
+                    el.setAttribute('data-filter-blur', '0');
+                    el.setAttribute('data-filter-opacity', '1');
+                    window.editor.applyTransforms(el);
+                    updateInspector(objId);
+                    saveCurrentScene(document.getElementById('canvas-container').firstChild);
+                }});
+            }
+
+            if (items.length === 0) {
+                alert("Este objeto ya tiene todos los componentes disponibles.");
+                return;
+            }
+
+            import('./contextMenu.js').then(mod => mod.createContextMenu(e, items));
+        },
         showComponentMenu: (e, objId, componentName) => {
             e.preventDefault();
             const el = document.getElementById('canvas-container').querySelector(`#${objId}`);
@@ -136,11 +172,17 @@ async function startEditor(projectHandle) {
                     saveCurrentScene(document.getElementById('canvas-container').firstChild);
                 }},
                 { icon: 'fas fa-trash', label: 'Eliminar', action: () => {
-                    if (componentName !== 'Inicio') {
-                        // Logic to remove component attributes if we had multiple components
-                        // For now, Posición and Inicio are standard
+                    if (componentName === 'Texto') {
+                        ['data-text-active', 'data-text-content', 'data-text-transform', 'data-text-align', 'data-font-family'].forEach(a => el.removeAttribute(a));
+                    } else if (componentName === 'Filtro') {
+                        ['data-filter-active', 'data-filter-color', 'data-filter-blur', 'data-filter-opacity'].forEach(a => el.removeAttribute(a));
+                    } else {
                         alert("Este componente no se puede eliminar ya que es esencial.");
+                        return;
                     }
+                    window.editor.applyTransforms(el);
+                    updateInspector(objId);
+                    saveCurrentScene(document.getElementById('canvas-container').firstChild);
                 }}
             ];
 
@@ -217,24 +259,37 @@ async function startEditor(projectHandle) {
             el.style.transform = `${translate} rotate(${rot}deg) scale(${scale})`;
 
             // Apply Text Styles
-            const textActive = el.getAttribute('data-text-active') !== 'false';
+            const textActive = el.hasAttribute('data-text-content') && el.getAttribute('data-text-active') !== 'false';
+            const filterActive = el.hasAttribute('data-filter-color') && el.getAttribute('data-filter-active') !== 'false';
+            const filterColor = el.getAttribute('data-filter-color') || 'transparent';
+
             if (textActive) {
                 el.textContent = el.getAttribute('data-text-content') || '';
                 el.style.textAlign = el.getAttribute('data-text-align') || 'left';
                 el.style.textTransform = el.getAttribute('data-text-transform') || 'none';
                 el.style.fontFamily = el.getAttribute('data-font-family') || 'inherit';
+
+                // Filter color applies to text if text is active
+                if (filterActive) {
+                    el.style.color = filterColor;
+                    el.style.backgroundColor = 'transparent';
+                } else {
+                    el.style.color = 'white'; // Default
+                }
             } else {
                 el.textContent = '';
+                if (filterActive) {
+                    el.style.backgroundColor = filterColor;
+                } else {
+                    el.style.backgroundColor = 'transparent';
+                }
             }
 
-            // Apply Filter Styles
-            const filterActive = el.getAttribute('data-filter-active') !== 'false';
+            // Common Filter Styles
             if (filterActive) {
-                el.style.backgroundColor = el.getAttribute('data-filter-color') || 'transparent';
                 el.style.filter = `blur(${el.getAttribute('data-filter-blur') || 0}px)`;
                 el.style.opacity = el.getAttribute('data-filter-opacity') || 1;
             } else {
-                el.style.backgroundColor = 'transparent';
                 el.style.filter = 'none';
                 el.style.opacity = 1;
             }

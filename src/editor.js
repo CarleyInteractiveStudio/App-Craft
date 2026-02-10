@@ -379,7 +379,8 @@ export function updateHierarchy(rootElement) {
     hierarchyContent.oncontextmenu = (e) => {
         e.preventDefault();
         createContextMenu(e, [
-            { icon: 'fas fa-plus', label: 'Crear Objeto', action: () => createChildObject(rootElement, rootElement) }
+            { icon: 'fas fa-plus', label: 'Crear Objeto Vacío', action: () => createChildObject(rootElement, rootElement, 'vacio') },
+            { icon: 'fas fa-font', label: 'Crear Texto', action: () => createChildObject(rootElement, rootElement, 'texto') }
         ]);
     };
 
@@ -405,7 +406,8 @@ export function updateHierarchy(rootElement) {
             e.stopPropagation();
             const isRoot = el.classList.contains('ventana-principal');
             createContextMenu(e, [
-                { icon: 'fas fa-plus', label: 'Crear Objeto', action: () => createChildObject(rootElement, rootElement) },
+                { icon: 'fas fa-plus', label: 'Crear Objeto Vacío', action: () => createChildObject(rootElement, rootElement, 'vacio') },
+                { icon: 'fas fa-font', label: 'Crear Texto', action: () => createChildObject(rootElement, rootElement, 'texto') },
                 { icon: 'fas fa-edit', label: 'Renombrar', action: () => renameObject(el, rootElement) },
                 { icon: 'fas fa-power-off', label: isActive ? 'Desactivar' : 'Activar', action: () => toggleObjectState(el, rootElement) },
                 { separator: true },
@@ -441,16 +443,15 @@ export function updateHierarchy(rootElement) {
     renderNode(rootElement, hierarchyContent);
 }
 
-function createChildObject(parentEl, rootElement) {
-    const name = prompt("Nombre del objeto:", "NuevoObjeto");
+function createChildObject(parentEl, rootElement, type = 'vacio') {
+    const name = prompt("Nombre del objeto:", type === 'vacio' ? "NuevoVacio" : "NuevoTexto");
     if (!name) return;
 
     const newObj = document.createElement('div');
     newObj.id = name.replace(/\s+/g, '-').toLowerCase();
     newObj.className = 'scene-object active';
-    newObj.textContent = name;
 
-    // Component Defaults
+    // Core Position Component (Always present)
     newObj.setAttribute('data-x', '0');
     newObj.setAttribute('data-y', '0');
     newObj.setAttribute('data-rotation', '0');
@@ -459,16 +460,15 @@ function createChildObject(parentEl, rootElement) {
     newObj.setAttribute('data-anchored', 'false');
     newObj.setAttribute('data-scale-ui', 'false');
 
-    // Text Component
-    newObj.setAttribute('data-text-content', name);
-    newObj.setAttribute('data-text-transform', 'none');
-    newObj.setAttribute('data-text-align', 'left');
-    newObj.setAttribute('data-font-family', 'inherit');
+    if (type === 'texto') {
+        newObj.setAttribute('data-text-active', 'true');
+        newObj.setAttribute('data-text-content', name);
+        newObj.setAttribute('data-text-transform', 'none');
+        newObj.setAttribute('data-text-align', 'left');
+        newObj.setAttribute('data-font-family', 'inherit');
+    }
 
-    // Filter Component
-    newObj.setAttribute('data-filter-color', 'transparent');
-    newObj.setAttribute('data-filter-blur', '0');
-    newObj.setAttribute('data-filter-opacity', '1');
+    // Filters are added manually now via Inspector
 
     parentEl.appendChild(newObj);
     updateHierarchy(rootElement);
