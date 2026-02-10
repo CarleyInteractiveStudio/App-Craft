@@ -376,6 +376,13 @@ export function updateHierarchy(rootElement) {
     const hierarchyContent = document.getElementById('hierarchy-content');
     hierarchyContent.innerHTML = '';
 
+    hierarchyContent.oncontextmenu = (e) => {
+        e.preventDefault();
+        createContextMenu(e, [
+            { icon: 'fas fa-plus', label: 'Crear Objeto', action: () => createChildObject(rootElement, rootElement) }
+        ]);
+    };
+
     const renderNode = (el, container) => {
         const item = document.createElement('div');
         item.className = 'hierarchy-item';
@@ -398,7 +405,7 @@ export function updateHierarchy(rootElement) {
             e.stopPropagation();
             const isRoot = el.classList.contains('ventana-principal');
             createContextMenu(e, [
-                { icon: 'fas fa-plus', label: 'Crear Hijo', action: () => createChildObject(el, rootElement) },
+                { icon: 'fas fa-plus', label: 'Crear Objeto', action: () => createChildObject(rootElement, rootElement) },
                 { icon: 'fas fa-edit', label: 'Renombrar', action: () => renameObject(el, rootElement) },
                 { icon: 'fas fa-power-off', label: isActive ? 'Desactivar' : 'Activar', action: () => toggleObjectState(el, rootElement) },
                 { separator: true },
