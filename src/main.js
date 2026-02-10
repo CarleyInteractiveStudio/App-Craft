@@ -79,7 +79,7 @@ async function startEditor(projectHandle) {
         },
         showAddComponentMenu: (e, objId) => {
             const el = document.getElementById('canvas-container').querySelector(`#${objId}`);
-            if (!el) return;
+            if (!el || el.classList.contains('ventana-principal')) return;
 
             const items = [];
             if (!el.hasAttribute('data-text-content')) {
@@ -201,64 +201,68 @@ async function startEditor(projectHandle) {
             }
         },
         applyTransforms: (el) => {
+            const isRoot = el.classList.contains('ventana-principal');
+
             // Apply Position Transforms
-            const x = parseFloat(el.getAttribute('data-x') || 0);
-            const y = parseFloat(el.getAttribute('data-y') || 0);
-            const rot = parseFloat(el.getAttribute('data-rotation') || 0);
-            let scale = parseFloat(el.getAttribute('data-scale') || 1);
-            const anchor = parseInt(el.getAttribute('data-anchor') || 1);
-            const isAnchored = el.getAttribute('data-anchored') === 'true';
-            const scaleUI = el.getAttribute('data-scale-ui') === 'true';
+            if (!isRoot) {
+                const x = parseFloat(el.getAttribute('data-x') || 0);
+                const y = parseFloat(el.getAttribute('data-y') || 0);
+                const rot = parseFloat(el.getAttribute('data-rotation') || 0);
+                let scale = parseFloat(el.getAttribute('data-scale') || 1);
+                const anchor = parseInt(el.getAttribute('data-anchor') || 1);
+                const isAnchored = el.getAttribute('data-anchored') === 'true';
+                const scaleUI = el.getAttribute('data-scale-ui') === 'true';
 
-            if (scaleUI) {
-                const canvas = document.getElementById('canvas-container');
-                if (canvas) {
-                    const referenceWidth = 1280;
-                    const currentWidth = canvas.offsetWidth;
-                    const uiScaleFactor = currentWidth / referenceWidth;
-                    scale *= uiScaleFactor;
+                if (scaleUI) {
+                    const canvas = document.getElementById('canvas-container');
+                    if (canvas) {
+                        const referenceWidth = 1280;
+                        const currentWidth = canvas.offsetWidth;
+                        const uiScaleFactor = currentWidth / referenceWidth;
+                        scale *= uiScaleFactor;
+                    }
                 }
-            }
 
-            let left = `${x}px`;
-            let top = `${y}px`;
-            let translate = '';
+                let left = `${x}px`;
+                let top = `${y}px`;
+                let translate = '';
 
-            if (isAnchored) {
-                switch (anchor) {
-                    case 1: // TL
-                        left = `${x}px`; top = `${y}px`; translate = '';
-                        break;
-                    case 2: // TC
-                        left = `calc(50% + ${x}px)`; top = `${y}px`; translate = 'translateX(-50%)';
-                        break;
-                    case 3: // TR
-                        left = `calc(100% + ${x}px)`; top = `${y}px`; translate = 'translateX(-100%)';
-                        break;
-                    case 4: // ML
-                        left = `${x}px`; top = `calc(50% + ${y}px)`; translate = 'translateY(-50%)';
-                        break;
-                    case 5: // MC
-                        left = `calc(50% + ${x}px)`; top = `calc(50% + ${y}px)`; translate = 'translate(-50%, -50%)';
-                        break;
-                    case 6: // MR
-                        left = `calc(100% + ${x}px)`; top = `calc(50% + ${y}px)`; translate = 'translate(-100%, -50%)';
-                        break;
-                    case 7: // BL
-                        left = `${x}px`; top = `calc(100% + ${y}px)`; translate = 'translateY(-100%)';
-                        break;
-                    case 8: // BC
-                        left = `calc(50% + ${x}px)`; top = `calc(100% + ${y}px)`; translate = 'translate(-50%, -100%)';
-                        break;
-                    case 9: // BR
-                        left = `calc(100% + ${x}px)`; top = `calc(100% + ${y}px)`; translate = 'translate(-100%, -100%)';
-                        break;
+                if (isAnchored) {
+                    switch (anchor) {
+                        case 1: // TL
+                            left = `${x}px`; top = `${y}px`; translate = '';
+                            break;
+                        case 2: // TC
+                            left = `calc(50% + ${x}px)`; top = `${y}px`; translate = 'translateX(-50%)';
+                            break;
+                        case 3: // TR
+                            left = `calc(100% + ${x}px)`; top = `${y}px`; translate = 'translateX(-100%)';
+                            break;
+                        case 4: // ML
+                            left = `${x}px`; top = `calc(50% + ${y}px)`; translate = 'translateY(-50%)';
+                            break;
+                        case 5: // MC
+                            left = `calc(50% + ${x}px)`; top = `calc(50% + ${y}px)`; translate = 'translate(-50%, -50%)';
+                            break;
+                        case 6: // MR
+                            left = `calc(100% + ${x}px)`; top = `calc(50% + ${y}px)`; translate = 'translate(-100%, -50%)';
+                            break;
+                        case 7: // BL
+                            left = `${x}px`; top = `calc(100% + ${y}px)`; translate = 'translateY(-100%)';
+                            break;
+                        case 8: // BC
+                            left = `calc(50% + ${x}px)`; top = `calc(100% + ${y}px)`; translate = 'translate(-50%, -100%)';
+                            break;
+                        case 9: // BR
+                            left = `calc(100% + ${x}px)`; top = `calc(100% + ${y}px)`; translate = 'translate(-100%, -100%)';
+                            break;
+                    }
                 }
-            }
 
-            el.style.left = left;
-            el.style.top = top;
-            el.style.transform = `${translate} rotate(${rot}deg) scale(${scale})`;
+                el.style.left = left;
+                el.style.top = top;
+                el.style.transform = `${translate} rotate(${rot}deg) scale(${scale})`;
+            }
 
             // Apply Text Styles
             const textActive = el.hasAttribute('data-text-content') && el.getAttribute('data-text-active') !== 'false';

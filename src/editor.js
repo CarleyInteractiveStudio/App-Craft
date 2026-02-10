@@ -286,11 +286,7 @@ async function createNewScene() {
     <link rel="stylesheet" href="${cssName}">
 </head>
 <body>
-    <div id="root" class="ventana-principal active" data-component="Inicio"
-         data-x="0" data-y="0" data-rotation="0" data-scale="1"
-         data-anchor="1" data-anchored="false" data-scale-ui="false"
-         data-text-content="" data-text-transform="none" data-text-align="left" data-font-family="inherit"
-         data-filter-color="transparent" data-filter-blur="0" data-filter-opacity="1">
+    <div id="root" class="ventana-principal active" data-inicio-active="true">
         <!-- Contenido de la escena -->
     </div>
 </body>
@@ -362,7 +358,7 @@ function renderSceneInView(content) {
 
         // Apply transforms to all objects
         const applyAll = (el) => {
-            if (el.hasAttribute('data-x')) window.editor.applyTransforms(el);
+            window.editor.applyTransforms(el);
             Array.from(el.children).forEach(applyAll);
         };
         applyAll(clonedRoot);
@@ -379,8 +375,7 @@ export function updateHierarchy(rootElement) {
     hierarchyContent.oncontextmenu = (e) => {
         e.preventDefault();
         createContextMenu(e, [
-            { icon: 'fas fa-plus', label: 'Crear Objeto Vacío', action: () => createChildObject(rootElement, rootElement, 'vacio') },
-            { icon: 'fas fa-font', label: 'Crear Texto', action: () => createChildObject(rootElement, rootElement, 'texto') }
+            { icon: 'fas fa-plus', label: 'Crear Objeto', action: () => createChildObject(rootElement, rootElement) }
         ]);
     };
 
@@ -406,8 +401,7 @@ export function updateHierarchy(rootElement) {
             e.stopPropagation();
             const isRoot = el.classList.contains('ventana-principal');
             createContextMenu(e, [
-                { icon: 'fas fa-plus', label: 'Crear Objeto Vacío', action: () => createChildObject(rootElement, rootElement, 'vacio') },
-                { icon: 'fas fa-font', label: 'Crear Texto', action: () => createChildObject(rootElement, rootElement, 'texto') },
+                { icon: 'fas fa-plus', label: 'Crear Objeto', action: () => createChildObject(rootElement, rootElement) },
                 { icon: 'fas fa-edit', label: 'Renombrar', action: () => renameObject(el, rootElement) },
                 { icon: 'fas fa-power-off', label: isActive ? 'Desactivar' : 'Activar', action: () => toggleObjectState(el, rootElement) },
                 { separator: true },
@@ -443,15 +437,15 @@ export function updateHierarchy(rootElement) {
     renderNode(rootElement, hierarchyContent);
 }
 
-function createChildObject(parentEl, rootElement, type = 'vacio') {
-    const name = prompt("Nombre del objeto:", type === 'vacio' ? "NuevoVacio" : "NuevoTexto");
+function createChildObject(parentEl, rootElement) {
+    const name = prompt("Nombre del objeto:", "NuevoObjeto");
     if (!name) return;
 
     const newObj = document.createElement('div');
     newObj.id = name.replace(/\s+/g, '-').toLowerCase();
     newObj.className = 'scene-object active';
 
-    // Core Position Component (Always present)
+    // Core Position Component (Always present for children)
     newObj.setAttribute('data-x', '0');
     newObj.setAttribute('data-y', '0');
     newObj.setAttribute('data-rotation', '0');
@@ -459,16 +453,6 @@ function createChildObject(parentEl, rootElement, type = 'vacio') {
     newObj.setAttribute('data-anchor', '1');
     newObj.setAttribute('data-anchored', 'false');
     newObj.setAttribute('data-scale-ui', 'false');
-
-    if (type === 'texto') {
-        newObj.setAttribute('data-text-active', 'true');
-        newObj.setAttribute('data-text-content', name);
-        newObj.setAttribute('data-text-transform', 'none');
-        newObj.setAttribute('data-text-align', 'left');
-        newObj.setAttribute('data-font-family', 'inherit');
-    }
-
-    // Filters are added manually now via Inspector
 
     parentEl.appendChild(newObj);
     updateHierarchy(rootElement);

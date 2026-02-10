@@ -43,6 +43,24 @@ export function updateInspector(objectId, assetData = null) {
         </div>
     `;
 
+    // Components
+    if (isRoot) {
+        const inicioActive = el.getAttribute('data-inicio-active') !== 'false';
+        html += `
+            <div class="inspector-section ${inicioActive ? '' : 'component-inactive'}" oncontextmenu="window.editor.showComponentMenu(event, '${el.id}', 'Inicio')">
+                <div class="section-header">
+                    <span>Componente: Inicio</span>
+                    <button class="comp-toggle-btn ${inicioActive ? 'active' : ''}" onclick="window.editor.toggleComponent('${el.id}', 'Inicio')">
+                        <i class="fas fa-toggle-${inicioActive ? 'on' : 'off'}"></i>
+                    </button>
+                </div>
+                <div style="padding: 10px; font-size: 0.8rem; color: var(--text-dim);">
+                    Este es el componente raíz que inicia la escena.
+                </div>
+            </div>
+        `;
+    }
+
     if (!isRoot) {
         html += `
         <div class="inspector-section" oncontextmenu="window.editor.showComponentMenu(event, '${el.id}', 'Posición')">
@@ -98,7 +116,7 @@ export function updateInspector(objectId, assetData = null) {
     }
 
     // Text Component
-    if (el.hasAttribute('data-text-content')) {
+    if (!isRoot && el.hasAttribute('data-text-content')) {
         const textActive = el.getAttribute('data-text-active') !== 'false';
         html += `
         <div class="inspector-section ${textActive ? '' : 'component-inactive'}" oncontextmenu="window.editor.showComponentMenu(event, '${el.id}', 'Texto')">
@@ -146,7 +164,7 @@ export function updateInspector(objectId, assetData = null) {
     }
 
     // Filter Component
-    if (el.hasAttribute('data-filter-color')) {
+    if (!isRoot && el.hasAttribute('data-filter-color')) {
         const filterActive = el.getAttribute('data-filter-active') !== 'false';
         html += `
         <div class="inspector-section ${filterActive ? '' : 'component-inactive'}" oncontextmenu="window.editor.showComponentMenu(event, '${el.id}', 'Filtro')">
@@ -188,23 +206,6 @@ export function updateInspector(objectId, assetData = null) {
         `;
     }
 
-    // Components
-    if (isRoot) {
-        const inicioActive = el.getAttribute('data-inicio-active') !== 'false';
-        html += `
-            <div class="inspector-section ${inicioActive ? '' : 'component-inactive'}" oncontextmenu="window.editor.showComponentMenu(event, '${el.id}', 'Inicio')">
-                <div class="section-header">
-                    <span>Componente: Inicio</span>
-                    <button class="comp-toggle-btn ${inicioActive ? 'active' : ''}" onclick="window.editor.toggleComponent('${el.id}', 'Inicio')">
-                        <i class="fas fa-toggle-${inicioActive ? 'on' : 'off'}"></i>
-                    </button>
-                </div>
-                <div style="padding: 10px; font-size: 0.8rem; color: var(--text-dim);">
-                    Este es el componente raíz que inicia la escena.
-                </div>
-            </div>
-        `;
-    }
 
     inspectorContent.innerHTML = html;
 }
