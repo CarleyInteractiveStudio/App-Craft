@@ -198,8 +198,8 @@ export function updateInspector(objectId, assetData = null) {
 
             <div class="inspector-row">
                 <label>Opacidad</label>
-                <input type="range" min="0" max="1" step="0.1" value="${el.getAttribute('data-filter-opacity') || 1}" oninput="window.editor.updateObjectAttribute('${el.id}', 'data-filter-opacity', this.value)">
-                <span class="value-display">${Math.round((el.getAttribute('data-filter-opacity') || 1) * 100)}%</span>
+                <input type="range" min="0" max="1" step="0.1" value="${el.getAttribute('data-filter-opacity') !== null ? el.getAttribute('data-filter-opacity') : 1}" oninput="window.editor.updateObjectAttribute('${el.id}', 'data-filter-opacity', this.value)">
+                <span class="value-display">${Math.round((el.getAttribute('data-filter-opacity') !== null ? el.getAttribute('data-filter-opacity') : 1) * 100)}%</span>
             </div>
         </div>
     `;

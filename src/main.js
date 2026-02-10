@@ -204,6 +204,7 @@ async function startEditor(projectHandle) {
         },
         applyTransforms: (el) => {
             const isRoot = el.classList.contains('ventana-principal');
+            console.log(`[ApplyTransforms] Aplicando a: ${el.id || 'root'} (isRoot: ${isRoot})`);
 
             // Apply Position Transforms
             if (!isRoot) {
@@ -295,12 +296,15 @@ async function startEditor(projectHandle) {
                 const blur = el.getAttribute('data-filter-blur');
                 const opacity = el.getAttribute('data-filter-opacity');
 
-                el.style.backgroundColor = filterColor;
+                console.log(`[ApplyTransforms] Filtro activo: Color=${filterColor}, Blur=${blur}, Opacity=${opacity}`);
 
+                el.style.backgroundColor = filterColor;
                 el.style.filter = `blur(${blur !== null ? blur : 0}px)`;
                 el.style.opacity = (opacity !== null && opacity !== '') ? opacity : 1;
-            } else if (el.hasAttribute('data-filter-active')) {
-                if (!isRoot) el.style.backgroundColor = 'transparent';
+            } else {
+                if (!isRoot) {
+                    el.style.backgroundColor = 'transparent';
+                }
                 el.style.filter = 'none';
                 el.style.opacity = 1;
             }
