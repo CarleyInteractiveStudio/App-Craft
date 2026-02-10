@@ -5,6 +5,7 @@ export async function restoreIcons(directoryHandle) {
         console.log("Iniciando restauración de iconos...");
         const assetsHandle = await directoryHandle.getDirectoryHandle('assets', { create: true });
         const iconsHandle = await assetsHandle.getDirectoryHandle('icons', { create: true });
+        await assetsHandle.getDirectoryHandle('fonts', { create: true });
 
         const entries = Object.entries(iconsLibrary);
         let restoredCount = 0;

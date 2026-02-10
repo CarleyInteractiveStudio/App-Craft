@@ -63,7 +63,12 @@ async function startEditor(projectHandle) {
         toggleComponent: (objId, componentName) => {
             const el = document.getElementById('canvas-container').querySelector(`#${objId}`);
             if (el) {
-                const attr = componentName === 'Posición' ? 'data-pos-active' : 'data-inicio-active';
+                let attr;
+                if (componentName === 'Posición') attr = 'data-pos-active';
+                else if (componentName === 'Inicio') attr = 'data-inicio-active';
+                else if (componentName === 'Texto') attr = 'data-text-active';
+                else if (componentName === 'Filtro') attr = 'data-filter-active';
+
                 const current = el.getAttribute(attr) !== 'false';
                 el.setAttribute(attr, !current);
                 updateInspector(objId);
@@ -83,6 +88,14 @@ async function startEditor(projectHandle) {
                     };
                     if (componentName === 'Posición') {
                         ['data-x', 'data-y', 'data-rotation', 'data-scale', 'data-anchor', 'data-anchored', 'data-scale-ui'].forEach(attr => {
+                            state.copiedComponent.attributes[attr] = el.getAttribute(attr);
+                        });
+                    } else if (componentName === 'Texto') {
+                        ['data-text-content', 'data-text-transform', 'data-text-align', 'data-font-family'].forEach(attr => {
+                            state.copiedComponent.attributes[attr] = el.getAttribute(attr);
+                        });
+                    } else if (componentName === 'Filtro') {
+                        ['data-filter-color', 'data-filter-blur', 'data-filter-opacity'].forEach(attr => {
                             state.copiedComponent.attributes[attr] = el.getAttribute(attr);
                         });
                     }
@@ -109,6 +122,15 @@ async function startEditor(projectHandle) {
                         el.setAttribute('data-anchored', 'false');
                         el.setAttribute('data-scale-ui', 'false');
                         window.editor.applyTransforms(el);
+                    } else if (componentName === 'Texto') {
+                        el.setAttribute('data-text-content', el.id);
+                        el.setAttribute('data-text-transform', 'none');
+                        el.setAttribute('data-text-align', 'left');
+                        el.setAttribute('data-font-family', 'inherit');
+                    } else if (componentName === 'Filtro') {
+                        el.setAttribute('data-filter-color', 'transparent');
+                        el.setAttribute('data-filter-blur', '0');
+                        el.setAttribute('data-filter-opacity', '1');
                     }
                     updateInspector(objId);
                     saveCurrentScene(document.getElementById('canvas-container').firstChild);
@@ -135,6 +157,7 @@ async function startEditor(projectHandle) {
             }
         },
         applyTransforms: (el) => {
+            // Apply Position Transforms
             const x = parseFloat(el.getAttribute('data-x') || 0);
             const y = parseFloat(el.getAttribute('data-y') || 0);
             const rot = parseFloat(el.getAttribute('data-rotation') || 0);
@@ -153,50 +176,68 @@ async function startEditor(projectHandle) {
                 }
             }
 
-            if (!isAnchored) {
-                el.style.left = `${x}px`;
-                el.style.top = `${y}px`;
-                el.style.transform = `rotate(${rot}deg) scale(${scale})`;
-                return;
-            }
-
-            let left = '0px';
-            let top = '0px';
+            let left = `${x}px`;
+            let top = `${y}px`;
             let translate = '';
 
-            switch (anchor) {
-                case 1: // TL
-                    left = `${x}px`; top = `${y}px`; translate = '';
-                    break;
-                case 2: // TC
-                    left = `calc(50% + ${x}px)`; top = `${y}px`; translate = 'translateX(-50%)';
-                    break;
-                case 3: // TR
-                    left = `calc(100% + ${x}px)`; top = `${y}px`; translate = 'translateX(-100%)';
-                    break;
-                case 4: // ML
-                    left = `${x}px`; top = `calc(50% + ${y}px)`; translate = 'translateY(-50%)';
-                    break;
-                case 5: // MC
-                    left = `calc(50% + ${x}px)`; top = `calc(50% + ${y}px)`; translate = 'translate(-50%, -50%)';
-                    break;
-                case 6: // MR
-                    left = `calc(100% + ${x}px)`; top = `calc(50% + ${y}px)`; translate = 'translate(-100%, -50%)';
-                    break;
-                case 7: // BL
-                    left = `${x}px`; top = `calc(100% + ${y}px)`; translate = 'translateY(-100%)';
-                    break;
-                case 8: // BC
-                    left = `calc(50% + ${x}px)`; top = `calc(100% + ${y}px)`; translate = 'translate(-50%, -100%)';
-                    break;
-                case 9: // BR
-                    left = `calc(100% + ${x}px)`; top = `calc(100% + ${y}px)`; translate = 'translate(-100%, -100%)';
-                    break;
+            if (isAnchored) {
+                switch (anchor) {
+                    case 1: // TL
+                        left = `${x}px`; top = `${y}px`; translate = '';
+                        break;
+                    case 2: // TC
+                        left = `calc(50% + ${x}px)`; top = `${y}px`; translate = 'translateX(-50%)';
+                        break;
+                    case 3: // TR
+                        left = `calc(100% + ${x}px)`; top = `${y}px`; translate = 'translateX(-100%)';
+                        break;
+                    case 4: // ML
+                        left = `${x}px`; top = `calc(50% + ${y}px)`; translate = 'translateY(-50%)';
+                        break;
+                    case 5: // MC
+                        left = `calc(50% + ${x}px)`; top = `calc(50% + ${y}px)`; translate = 'translate(-50%, -50%)';
+                        break;
+                    case 6: // MR
+                        left = `calc(100% + ${x}px)`; top = `calc(50% + ${y}px)`; translate = 'translate(-100%, -50%)';
+                        break;
+                    case 7: // BL
+                        left = `${x}px`; top = `calc(100% + ${y}px)`; translate = 'translateY(-100%)';
+                        break;
+                    case 8: // BC
+                        left = `calc(50% + ${x}px)`; top = `calc(100% + ${y}px)`; translate = 'translate(-50%, -100%)';
+                        break;
+                    case 9: // BR
+                        left = `calc(100% + ${x}px)`; top = `calc(100% + ${y}px)`; translate = 'translate(-100%, -100%)';
+                        break;
+                }
             }
 
             el.style.left = left;
             el.style.top = top;
             el.style.transform = `${translate} rotate(${rot}deg) scale(${scale})`;
+
+            // Apply Text Styles
+            const textActive = el.getAttribute('data-text-active') !== 'false';
+            if (textActive) {
+                el.textContent = el.getAttribute('data-text-content') || '';
+                el.style.textAlign = el.getAttribute('data-text-align') || 'left';
+                el.style.textTransform = el.getAttribute('data-text-transform') || 'none';
+                el.style.fontFamily = el.getAttribute('data-font-family') || 'inherit';
+            } else {
+                el.textContent = '';
+            }
+
+            // Apply Filter Styles
+            const filterActive = el.getAttribute('data-filter-active') !== 'false';
+            if (filterActive) {
+                el.style.backgroundColor = el.getAttribute('data-filter-color') || 'transparent';
+                el.style.filter = `blur(${el.getAttribute('data-filter-blur') || 0}px)`;
+                el.style.opacity = el.getAttribute('data-filter-opacity') || 1;
+            } else {
+                el.style.backgroundColor = 'transparent';
+                el.style.filter = 'none';
+                el.style.opacity = 1;
+            }
         }
     };
 

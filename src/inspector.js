@@ -101,6 +101,82 @@ export function updateInspector(objectId, assetData = null) {
         </div>`;
     }
 
+    // Text Component
+    const textActive = el.getAttribute('data-text-active') !== 'false';
+    html += `
+        <div class="inspector-section ${textActive ? '' : 'component-inactive'}" oncontextmenu="window.editor.showComponentMenu(event, '${el.id}', 'Texto')">
+            <div class="section-header">
+                <span>Texto</span>
+                <button class="comp-toggle-btn ${textActive ? 'active' : ''}" onclick="window.editor.toggleComponent('${el.id}', 'Texto')">
+                    <i class="fas fa-toggle-${textActive ? 'on' : 'off'}"></i>
+                </button>
+            </div>
+
+            <div class="inspector-row">
+                <label>Contenido</label>
+                <textarea onchange="window.editor.updateObjectAttribute('${el.id}', 'data-text-content', this.value)">${el.getAttribute('data-text-content') || ''}</textarea>
+            </div>
+
+            <div class="inspector-row">
+                <label>Alineación</label>
+                <div class="toggle-group">
+                    <button class="${el.getAttribute('data-text-align') === 'left' ? 'active' : ''}" onclick="window.editor.updateObjectAttribute('${el.id}', 'data-text-align', 'left')"><i class="fas fa-align-left"></i></button>
+                    <button class="${el.getAttribute('data-text-align') === 'center' ? 'active' : ''}" onclick="window.editor.updateObjectAttribute('${el.id}', 'data-text-align', 'center')"><i class="fas fa-align-center"></i></button>
+                    <button class="${el.getAttribute('data-text-align') === 'right' ? 'active' : ''}" onclick="window.editor.updateObjectAttribute('${el.id}', 'data-text-align', 'right')"><i class="fas fa-align-right"></i></button>
+                </div>
+            </div>
+
+            <div class="inspector-row">
+                <label>Formato</label>
+                <div class="toggle-group">
+                    <button title="Normal" class="${el.getAttribute('data-text-transform') === 'none' ? 'active' : ''}" onclick="window.editor.updateObjectAttribute('${el.id}', 'data-text-transform', 'none')">Abc</button>
+                    <button title="Mayúsculas" class="${el.getAttribute('data-text-transform') === 'uppercase' ? 'active' : ''}" onclick="window.editor.updateObjectAttribute('${el.id}', 'data-text-transform', 'uppercase')">ABC</button>
+                    <button title="Minúsculas" class="${el.getAttribute('data-text-transform') === 'lowercase' ? 'active' : ''}" onclick="window.editor.updateObjectAttribute('${el.id}', 'data-text-transform', 'lowercase')">abc</button>
+                </div>
+            </div>
+
+            <div class="inspector-row">
+                <label>Fuente</label>
+                <select onchange="window.editor.updateObjectAttribute('${el.id}', 'data-font-family', this.value)">
+                    <option value="inherit" ${el.getAttribute('data-font-family') === 'inherit' ? 'selected' : ''}>Predeterminada</option>
+                    <option value="Arial" ${el.getAttribute('data-font-family') === 'Arial' ? 'selected' : ''}>Arial</option>
+                    <option value="Verdana" ${el.getAttribute('data-font-family') === 'Verdana' ? 'selected' : ''}>Verdana</option>
+                    <option value="Georgia" ${el.getAttribute('data-font-family') === 'Georgia' ? 'selected' : ''}>Georgia</option>
+                </select>
+            </div>
+        </div>
+    `;
+
+    // Filter Component
+    const filterActive = el.getAttribute('data-filter-active') !== 'false';
+    html += `
+        <div class="inspector-section ${filterActive ? '' : 'component-inactive'}" oncontextmenu="window.editor.showComponentMenu(event, '${el.id}', 'Filtro')">
+            <div class="section-header">
+                <span>Filtro</span>
+                <button class="comp-toggle-btn ${filterActive ? 'active' : ''}" onclick="window.editor.toggleComponent('${el.id}', 'Filtro')">
+                    <i class="fas fa-toggle-${filterActive ? 'on' : 'off'}"></i>
+                </button>
+            </div>
+
+            <div class="inspector-row">
+                <label>Color</label>
+                <input type="color" value="${el.getAttribute('data-filter-color') === 'transparent' ? '#ffffff' : el.getAttribute('data-filter-color')}" onchange="window.editor.updateObjectAttribute('${el.id}', 'data-filter-color', this.value)">
+            </div>
+
+            <div class="inspector-row">
+                <label>Desenfoque</label>
+                <input type="range" min="0" max="20" value="${el.getAttribute('data-filter-blur') || 0}" oninput="window.editor.updateObjectAttribute('${el.id}', 'data-filter-blur', this.value)">
+                <span class="value-display">${el.getAttribute('data-filter-blur') || 0}px</span>
+            </div>
+
+            <div class="inspector-row">
+                <label>Opacidad</label>
+                <input type="range" min="0" max="1" step="0.1" value="${el.getAttribute('data-filter-opacity') || 1}" oninput="window.editor.updateObjectAttribute('${el.id}', 'data-filter-opacity', this.value)">
+                <span class="value-display">${Math.round((el.getAttribute('data-filter-opacity') || 1) * 100)}%</span>
+            </div>
+        </div>
+    `;
+
     // Components
     if (isRoot) {
         const inicioActive = el.getAttribute('data-inicio-active') !== 'false';
@@ -141,6 +217,12 @@ function renderAssetInspector(container, data) {
         previewHtml = `
             <div class="asset-preview-container">
                 <div class="asset-preview-svg">${data.content}</div>
+            </div>
+        `;
+    } else if (data.name.endsWith('.ttf') || data.name.endsWith('.woff') || data.name.endsWith('.woff2')) {
+        previewHtml = `
+            <div class="asset-preview-container">
+                <div style="font-size: 3rem; color: var(--text-main);">Aa</div>
             </div>
         `;
     }

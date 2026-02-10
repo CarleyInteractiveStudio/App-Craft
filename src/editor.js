@@ -198,6 +198,9 @@ export async function updateFileBrowser(projectHandle) {
             } else if (file.name.endsWith('.svg')) {
                 icon.className = 'fas fa-file-image';
                 icon.style.color = '#e67e22';
+            } else if (file.name.endsWith('.ttf') || file.name.endsWith('.woff') || file.name.endsWith('.woff2')) {
+                icon.className = 'fas fa-font';
+                icon.style.color = '#9b59b6';
             } else {
                 icon.className = 'fas fa-file-code';
                 icon.style.color = '#3498db';
@@ -214,6 +217,7 @@ export async function updateFileBrowser(projectHandle) {
                     e.stopPropagation();
                     if (file.name.endsWith('.html')) openScene(file.handle);
                     else if (file.name.endsWith('.svg')) selectAsset(file.handle);
+                    else if (file.name.endsWith('.ttf') || file.name.endsWith('.woff') || file.name.endsWith('.woff2')) selectAsset(file.handle);
                 };
             }
 
@@ -284,7 +288,9 @@ async function createNewScene() {
 <body>
     <div id="root" class="ventana-principal active" data-component="Inicio"
          data-x="0" data-y="0" data-rotation="0" data-scale="1"
-         data-anchor="1" data-anchored="false" data-scale-ui="false">
+         data-anchor="1" data-anchored="false" data-scale-ui="false"
+         data-text-content="" data-text-transform="none" data-text-align="left" data-font-family="inherit"
+         data-filter-color="transparent" data-filter-blur="0" data-filter-opacity="1">
         <!-- Contenido de la escena -->
     </div>
 </body>
@@ -437,14 +443,25 @@ function createChildObject(parentEl, rootElement) {
     newObj.className = 'scene-object active';
     newObj.textContent = name;
 
-    // Position Component Defaults
+    // Component Defaults
     newObj.setAttribute('data-x', '0');
     newObj.setAttribute('data-y', '0');
     newObj.setAttribute('data-rotation', '0');
     newObj.setAttribute('data-scale', '1');
-    newObj.setAttribute('data-anchor', '1'); // Top-Left default
+    newObj.setAttribute('data-anchor', '1');
     newObj.setAttribute('data-anchored', 'false');
     newObj.setAttribute('data-scale-ui', 'false');
+
+    // Text Component
+    newObj.setAttribute('data-text-content', name);
+    newObj.setAttribute('data-text-transform', 'none');
+    newObj.setAttribute('data-text-align', 'left');
+    newObj.setAttribute('data-font-family', 'inherit');
+
+    // Filter Component
+    newObj.setAttribute('data-filter-color', 'transparent');
+    newObj.setAttribute('data-filter-blur', '0');
+    newObj.setAttribute('data-filter-opacity', '1');
 
     parentEl.appendChild(newObj);
     updateHierarchy(rootElement);
