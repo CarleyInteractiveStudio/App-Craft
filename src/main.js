@@ -204,7 +204,6 @@ async function startEditor(projectHandle) {
         },
         applyTransforms: (el) => {
             const isRoot = el.classList.contains('ventana-principal');
-            console.log(`[ApplyTransforms] Aplicando a: ${el.id || 'root'} (isRoot: ${isRoot})`);
 
             // Apply Position Transforms
             if (!isRoot) {
@@ -295,8 +294,6 @@ async function startEditor(projectHandle) {
             if (filterActive) {
                 const blur = el.getAttribute('data-filter-blur');
                 const opacity = el.getAttribute('data-filter-opacity');
-
-                console.log(`[ApplyTransforms] Filtro activo: Color=${filterColor}, Blur=${blur}, Opacity=${opacity}`);
 
                 el.style.backgroundColor = filterColor;
                 el.style.filter = `blur(${blur !== null ? blur : 0}px)`;
