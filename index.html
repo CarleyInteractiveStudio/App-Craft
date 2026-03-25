@@ -3,72 +3,78 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>App Craft Editor</title>
-    <link rel="stylesheet" href="style.css">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/7.0.1/css/all.min.css">
+    <title>App Craft - Engine</title>
+    <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 </head>
-<body>
-    <div class="editor-container">
+<body class="dark-theme">
+    <div id="app-container">
+        <!-- Top Bar -->
         <header id="top-bar">
-            <div class="app-title">App Craft - [Sin Proyecto]</div>
-            <nav class="menu">
-                <ul>
-                    <li>Archivo</li>
-                    <li>Editar</li>
-                    <li>Configuración</li>
-                    <li>Librerías</li>
-                    <li>Ayuda</li>
-                </ul>
-            </nav>
+            <div class="logo">
+                <i class="fas fa-cube"></i>
+                <span>App Craft</span>
+            </div>
+            <div class="project-info">
+                <span id="project-name">Sin Proyecto</span>
+            </div>
+            <div class="top-actions">
+                <button id="btn-open-folder" title="Abrir Carpeta Local">
+                    <i class="fas fa-folder-open"></i> Abrir
+                </button>
+                <button id="btn-save" title="Guardar Cambios">
+                    <i class="fas fa-save"></i> Guardar
+                </button>
+            </div>
         </header>
-        <main id="main-layout">
-            <aside id="left-panel">
-                <div id="hierarchy-panel" class="window">
-                    <div class="window-header">
-                        <span>Jerarquía</span>
-                        <button class="close-btn">X</button>
-                    </div>
-                    <div class="window-content">
-                        <!-- Content for hierarchy -->
-                    </div>
+
+        <!-- Main Workspace -->
+        <main id="workspace">
+            <!-- Left Panel: HTML Hierarchy -->
+            <aside id="hierarchy-panel" class="panel">
+                <div class="panel-header">
+                    <i class="fas fa-sitemap"></i>
+                    <span>HTML / Jerarquía</span>
                 </div>
-                <div id="files-panel" class="window">
-                    <div class="window-header">
-                        <span>Navegador de Archivos</span>
-                        <button class="close-btn">X</button>
-                    </div>
-                    <div class="window-content">
-                        <!-- Content for files -->
-                    </div>
+                <div class="panel-content" id="hierarchy-content">
+                    <ul id="hierarchy-list"></ul>
+                </div>
+                <div class="panel-footer">
+                    <button id="btn-add-element"><i class="fas fa-plus"></i> Añadir</button>
                 </div>
             </aside>
-            <section id="center-panel">
-                <div id="view-panel" class="window">
-                     <div class="window-header">
-                        <span>Vista</span>
-                        <div class="view-controls">
-                            <button>▶</button>
-                            <button>❚❚</button>
-                        </div>
-                    </div>
-                    <div class="window-content">
-                        <!-- The main view area -->
+
+            <!-- Center Panel: Live View & Gizmos -->
+            <section id="view-panel">
+                <div id="canvas-container">
+                    <div id="canvas-frame">
+                        <iframe id="project-view" sandbox="allow-scripts allow-same-origin"></iframe>
+                        <!-- Gizmos will be rendered on top of the iframe or in a overlay div -->
+                        <div id="gizmo-overlay"></div>
                     </div>
                 </div>
             </section>
-            <aside id="right-panel">
-                <div id="inspector-panel" class="window">
-                    <div class="window-header">
-                        <span>Inspector</span>
-                        <button class="close-btn">X</button>
-                    </div>
-                    <div class="window-content">
-                        <!-- Content for inspector -->
-                    </div>
+
+            <!-- Right Panel: CSS Rules / Inspector -->
+            <aside id="inspector-panel" class="panel">
+                <div class="panel-header">
+                    <i class="fas fa-sliders-h"></i>
+                    <span>Reglas / Estilos</span>
+                </div>
+                <div class="panel-content" id="inspector-content">
+                    <div class="no-selection">Selecciona un elemento para editar</div>
                 </div>
             </aside>
         </main>
+
+        <!-- Status Bar -->
+        <footer id="status-bar">
+            <span id="status-text">Listo</span>
+        </footer>
     </div>
-    <script src="script.js"></script>
+
+    <!-- Main Entry Point -->
+    <script type="module" src="src/main.js"></script>
 </body>
 </html>
